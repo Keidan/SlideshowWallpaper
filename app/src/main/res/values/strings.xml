@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">Slideshow Wallpaper</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
+    <string name="tvFrequencyScreen">Only when the screen is turned on/off</string>
+    <string name="tvFrequencyDelay">Delay between slides:</string>
+    <string name="select_folder">Select folder</string>
+    <string name="select_folder_none">No folder</string>
+    <string name="error_title">Error</string>
+    <string name="error_permission_message">The application can\'t work properly without the required permissions.</string>
+    <string name="toggleOn">Start slideshow</string>
+    <string name="toggleOff">Stop slideshow</string>
+    <string name="error_permissions_not_granted">Permissions not granted!</string>
+    <string name="error_invalid_folder_empty">Select a folder before!</string>
+    <string name="error_invalid_folder_attribute">Invalid folder attributes!</string>
+    <string name="error_unable_to_read_file">Unable to read image file</string>
+    <string name="loading">Loading&#8230;</string>
+    <string name="chooser_image_folder_title">Wallpaper folder</string>
+    <string name="chooser_image_folder_message">Use this folder</string>
+    <string name="chooser_long_press_message">Long press to select the directory.</string>
+    <string name="chooser_parent_directory">Parent Directory</string>
+    <string name="chooser_folder">Folder</string>
+    <string name="chooser_file_size">File size</string>
+</resources>

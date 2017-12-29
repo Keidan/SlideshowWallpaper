@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_marginTop="@dimen/activity_vertical_margin"
+    android:layout_marginBottom="@dimen/activity_vertical_margin"
+    android:layout_marginStart="@dimen/activity_horizontal_margin"
+    android:layout_marginEnd="@dimen/activity_horizontal_margin"
+    android:fitsSystemWindows="true"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="fr.ralala.slideshowwallpaper.ui.activities.SlideshowWallpaperActivity">
+
+    <TableLayout
+        android:id="@+id/tableFrequency"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:stretchColumns="*">
+        <TableRow>
+            <CheckBox
+                android:id="@+id/ckFrequency1"
+                android:layout_span="2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/tvFrequencyScreen"/>
+        </TableRow>
+        <TableRow>
+            <TextView
+                android:id="@+id/tvFrequency"
+                android:layout_span="2"
+                android:layout_marginTop="@dimen/table_row_frequency_label_layout_marginTop"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/tvFrequencyDelay"/>
+        </TableRow>
+        <TableRow>
+            <Spinner
+                android:id="@+id/spFrequencyValue"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+            </Spinner>
+            <Spinner
+                android:id="@+id/spFrequencyUnit"
+                android:entries="@array/frequencies_labels"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+            </Spinner>
+        </TableRow>
+        <TableRow>
+            <TextView
+                android:background="@drawable/line_border"
+                android:layout_marginTop="@dimen/table_row_browse_layout_marginTop"
+                android:padding="@dimen/table_row_browse_padding"
+                android:layout_span="2"
+                android:id="@+id/tvBrowse"
+                android:text="@string/select_folder_none"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </TableRow>
+        <TableRow>
+            <Button
+                android:layout_span="2"
+                android:id="@+id/btBrowse"
+                android:text="@string/select_folder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </TableRow>
+
+        <TableRow>
+            <ToggleButton
+                android:layout_marginTop="@dimen/table_row_onoff_layout_marginTop"
+                android:id="@+id/toggleOnOff"
+                android:layout_span="2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textOff="@string/toggleOn"
+                android:textOn="@string/toggleOff" />
+        </TableRow>
+    </TableLayout>
+
+</ScrollView>

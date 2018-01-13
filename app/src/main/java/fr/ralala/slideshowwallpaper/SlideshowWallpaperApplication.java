@@ -19,6 +19,8 @@ import android.support.v4.app.ActivityCompat;
  */
 public class SlideshowWallpaperApplication extends Application {
   private static final String KEY_FREQUENCY_SCREEN = "frequencyScreen";
+  private static final String KEY_SCROLLABLE_WALLPAPER = "scrollableWallpaper";
+  private static final String KEY_LOCK_SCREEN_WALLPAPER = "lockScreenWallpaper";
   private static final String KEY_FREQUENCY_VAL = "frequencyValue";
   private static final String KEY_FREQUENCY_UNIT = "frequencyUnit";
   private static final String KEY_FOLDER = "folder";
@@ -26,6 +28,8 @@ public class SlideshowWallpaperApplication extends Application {
   private static final int DEFAULT_FREQUENCY_VAL = 0;
   private static final int DEFAULT_FREQUENCY_UNIT = 0;
   private static final boolean DEFAULT_FREQUENCY_SCREEN = true;
+  private static final boolean DEFAULT_SCROLLABLE_WALLPAPER = false;
+  private static final boolean DEFAULT_LOCK_SCREEN_WALLPAPER = false;
   private static final String DEFAULT_FOLDER = "";
   private static final int DEFAULT_CURRENT_FILE = 0;
   private boolean mSenpuku = false;
@@ -128,11 +132,47 @@ public class SlideshowWallpaperApplication extends Application {
   }
 
   /**
-   * Returns the frequency unit.
+   * Returns the frequency screen state.
    * @return boolean
    */
   public boolean isFrequencyScreen() {
     return mPrefs.getBoolean(KEY_FREQUENCY_SCREEN, DEFAULT_FREQUENCY_SCREEN);
+  }
+
+  /**
+   * Sets the scrollable wallpaper.
+   * @param scrollableWallpaper The new value.
+   */
+  public void setScrollableWallpaper(boolean scrollableWallpaper) {
+    SharedPreferences.Editor e = mPrefs.edit();
+    e.putBoolean(KEY_SCROLLABLE_WALLPAPER, scrollableWallpaper);
+    e.apply();
+  }
+
+  /**
+   * Returns the scrollable wallpaper state.
+   * @return boolean
+   */
+  public boolean isScrollableWallpaper() {
+    return mPrefs.getBoolean(KEY_SCROLLABLE_WALLPAPER, DEFAULT_SCROLLABLE_WALLPAPER);
+  }
+
+  /**
+   * Sets the lock screen wallpaper.
+   * @param lockScreen The new value.
+   */
+  public void setLockScreenWallpaper(boolean lockScreen) {
+    SharedPreferences.Editor e = mPrefs.edit();
+    e.putBoolean(KEY_LOCK_SCREEN_WALLPAPER, lockScreen);
+    e.apply();
+  }
+
+  /**
+   * Returns the lock screen wallpaper state.
+   * @return boolean
+   */
+  public boolean isLockScreenWallpaper() {
+    return mPrefs.getBoolean(KEY_LOCK_SCREEN_WALLPAPER, DEFAULT_LOCK_SCREEN_WALLPAPER);
   }
 
   /**

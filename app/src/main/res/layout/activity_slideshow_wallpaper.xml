@@ -18,7 +18,7 @@
         android:stretchColumns="*">
         <TableRow>
             <CheckBox
-                android:id="@+id/ckFrequency1"
+                android:id="@+id/ckFrequency"
                 android:layout_span="2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -45,6 +45,22 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
             </Spinner>
+        </TableRow>
+        <TableRow>
+            <CheckBox
+                android:id="@+id/ckScrollableWallpaper"
+                android:layout_span="2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/ckScrollableWallpaper"/>
+        </TableRow>
+        <TableRow>
+            <CheckBox
+                android:id="@+id/ckLockScreenWallpaper"
+                android:layout_span="2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/ckLockScreenWallpaper"/>
         </TableRow>
         <TableRow>
             <TextView

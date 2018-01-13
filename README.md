@@ -9,7 +9,9 @@ Slideshow images are selectable by single directory.
 
 The frequency of modification of the wallpaper is done either on timers or when the screen is turned on/off.
 
+Wallpaper can scroll when changing home screen.
 
+The lock screen can also be modified.
 
 
 

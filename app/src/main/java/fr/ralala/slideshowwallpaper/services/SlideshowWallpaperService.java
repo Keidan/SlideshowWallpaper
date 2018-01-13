@@ -8,9 +8,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.Display;
+import android.view.WindowManager;
 
 import java.io.File;
 import java.net.URLConnection;
@@ -115,7 +118,8 @@ public class SlideshowWallpaperService extends Service implements Runnable {
       final Intent intent = new Intent(this, RestartServiceReceiver.class);
       intent.setAction(RESTART_ACTION);
       sendBroadcast(intent);
-    }
+    } else
+      Log.i(getClass().getSimpleName(), "Destroy service.");
     super.onDestroy();
   }
 
@@ -129,8 +133,8 @@ public class SlideshowWallpaperService extends Service implements Runnable {
   @Override
   public int onStartCommand(final Intent intent, final int flags,
                             final int startId) {
+    performChange();
     if(!mApp.isFrequencyScreen()) {
-      performChange();
       mHandler.postDelayed(this, getDelay());
     }
     return START_STICKY;
@@ -157,8 +161,45 @@ public class SlideshowWallpaperService extends Service implements Runnable {
         if(i == mApp.getCurrentFile()) {
           try {
             Bitmap bm = BitmapFactory.decodeFile(path);
-            Log.i(getClass().getSimpleName(), "idx:"+idx+", current:"+mApp.getCurrentFile() + ", bm:"+bm);
-            mWallpaperManager.setBitmap(bm);
+            boolean scrollable = mApp.isScrollableWallpaper();
+            Log.i(getClass().getSimpleName(), "MainScreen -> idx:"+idx+", current:"+mApp.getCurrentFile() + ", bm:"+bm + ", scrollable:"+scrollable);
+            if(!scrollable)
+              mWallpaperManager.setBitmap(bm);
+            else {
+              //get screen height
+              boolean error = false;
+              WindowManager window = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+              if(window != null) {
+                try {
+                  Display display = window.getDefaultDisplay();
+                  Point size = new Point();
+                  display.getSize(size);
+                  int screenHeight = size.y;
+                  //adjust the aspect ratio of the Image
+                  //this is the main part
+                  int width = bm.getWidth();
+                  int height = bm.getHeight();
+                  width = (width * screenHeight) / bm.getHeight();
+                  Log.i(getClass().getSimpleName(), "MainScreen -> Src [w:" + bm.getWidth() + ", h:" +
+                      bm.getHeight() + "], Screen [w:" + size.x + ", h:" + size.y + "], Dst [w:" + width + ", h:" + height + "]");
+                  //set the wallpaper
+                  //this may not be the most efficent way but it worked for me
+                  mWallpaperManager.setBitmap(Bitmap.createScaledBitmap(bm, width, height, true));
+                } catch (Exception e) {
+                  Log.e(getClass().getSimpleName(), "Exception: " + e.getMessage(), e);
+                  error = true;
+                }
+              } else
+                error = true;
+              if(error) {
+                Log.e(getClass().getSimpleName(), "MainScreen -> An error occurred with the scrollable wallpaper. Using static wallpaper instead.");
+                mWallpaperManager.setBitmap(bm);
+              }
+            }
+            if(mApp.isLockScreenWallpaper()) {
+              Log.i(getClass().getSimpleName(), "LockScreen -> idx:"+idx+", current:"+mApp.getCurrentFile() + ", bm:"+bm);
+              mWallpaperManager.setBitmap(bm, null, true, WallpaperManager.FLAG_LOCK);
+            }
             break;
           } catch(Exception e) {
             String err = getString(R.string.error_unable_to_read_file) + " '" + file.getName() + "'";

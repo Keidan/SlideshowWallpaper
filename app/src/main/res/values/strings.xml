@@ -4,6 +4,8 @@
     <string name="ok">OK</string>
     <string name="tvFrequencyScreen">Only when the screen is turned on/off</string>
     <string name="tvFrequencyDelay">Delay between slides:</string>
+    <string name="ckScrollableWallpaper">Scrollable wallpaper</string>
+    <string name="ckLockScreenWallpaper">Lock screen wallpaper</string>
     <string name="select_folder">Select folder</string>
     <string name="select_folder_none">No folder</string>
     <string name="error_title">Error</string>
@@ -21,4 +23,12 @@
     <string name="chooser_parent_directory">Parent Directory</string>
     <string name="chooser_folder">Folder</string>
     <string name="chooser_file_size">File size</string>
+    <string name="action_changelog">Changelog</string>
+
+    <!-- Changelog -->
+    <string name="changelog_full_title">Change Log</string>
+    <string name="changelog_title">What\'s New</string>
+    <string name="changelog_ok_button">OK</string>
+    <string name="changelog_show_full">more&#8230;</string>
+    <string name="background_color" translatable="false">#FF424242</string>
 </resources>

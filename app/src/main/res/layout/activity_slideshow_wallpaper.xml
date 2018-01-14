@@ -9,7 +9,7 @@
     android:fitsSystemWindows="true"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="fr.ralala.slideshowwallpaper.ui.activities.SlideshowWallpaperActivity">
+    tools:context="fr.ralala.slideshowwallpaper.ui.SlideshowWallpaperActivity">
 
     <TableLayout
         android:id="@+id/tableFrequency"
@@ -48,14 +48,6 @@
         </TableRow>
         <TableRow>
             <CheckBox
-                android:id="@+id/ckScrollableWallpaper"
-                android:layout_span="2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/ckScrollableWallpaper"/>
-        </TableRow>
-        <TableRow>
-            <CheckBox
                 android:id="@+id/ckLockScreenWallpaper"
                 android:layout_span="2"
                 android:layout_width="wrap_content"
@@ -63,12 +55,28 @@
                 android:text="@string/ckLockScreenWallpaper"/>
         </TableRow>
         <TableRow>
+            <RadioButton
+                android:layout_marginTop="@dimen/table_row_browse_layout_marginTop"
+                android:id="@+id/rbBrowseFromFolder"
+                android:layout_span="2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/rbBrowseFromFolder"/>
+        </TableRow>
+        <TableRow>
+            <CheckBox
+                android:id="@+id/ckScrollableWallpaperFromFolder"
+                android:layout_span="2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/ckScrollableWallpaper"/>
+        </TableRow>
+        <TableRow>
             <TextView
                 android:background="@drawable/line_border"
-                android:layout_marginTop="@dimen/table_row_browse_layout_marginTop"
                 android:padding="@dimen/table_row_browse_padding"
                 android:layout_span="2"
-                android:id="@+id/tvBrowse"
+                android:id="@+id/tvBrowseFromFolder"
                 android:text="@string/select_folder_none"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
@@ -76,8 +84,24 @@
         <TableRow>
             <Button
                 android:layout_span="2"
-                android:id="@+id/btBrowse"
+                android:id="@+id/btBrowseFromFolder"
                 android:text="@string/select_folder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </TableRow>
+        <TableRow>
+            <RadioButton
+                android:id="@+id/rbBrowseFromDatabase"
+                android:layout_span="2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/rbBrowseFromDatabase"/>
+        </TableRow>
+        <TableRow>
+            <Button
+                android:layout_span="2"
+                android:id="@+id/btBrowseFromDatabase"
+                android:text="@string/btBrowseFromDatabase"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
         </TableRow>

@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-import fr.ralala.slideshowwallpaper.ui.activities.SlideshowWallpaperActivity;
+import fr.ralala.slideshowwallpaper.ui.SlideshowWallpaperActivity;
 
 /**
  *******************************************************************************

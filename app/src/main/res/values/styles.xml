@@ -22,6 +22,7 @@
         <item name="ic_file">@mipmap/ic_file_theme_dark</item>
         <item name="ic_folder">@mipmap/ic_folder_theme_dark</item>
         <item name="android:checkboxStyle">@style/CheckBoxStyle</item>
+        <item name="android:radioButtonStyle">@style/RadioButtonStyle</item>
     </style>
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
@@ -48,6 +49,10 @@
         <item name="android:background">@color/windowBackground</item>
     </style>
     <style name="CheckBoxStyle" parent="Widget.AppCompat.CompoundButton.CheckBox">
+        <item name="android:textColor">@color/text_color_enabled</item>
+        <item name="buttonTint">@color/accent_color_enabled</item>
+    </style>
+    <style name="RadioButtonStyle" parent="Widget.AppCompat.CompoundButton.RadioButton">
         <item name="android:textColor">@color/text_color_enabled</item>
         <item name="buttonTint">@color/accent_color_enabled</item>
     </style>

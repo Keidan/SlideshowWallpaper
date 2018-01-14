@@ -15,7 +15,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:name=".SlideshowWallpaperApplication">
-        <activity android:name=".ui.activities.SlideshowWallpaperActivity">
+        <activity android:name=".ui.SlideshowWallpaperActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.VIEW" />
@@ -23,6 +23,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.chooser.FileChooserActivity"/>
+        <activity android:name=".ui.images.ManageImagesActivity"/>
+        <activity android:name=".ui.images.ImageActivity"/>
 
         <service
             android:name=".services.SlideshowWallpaperService"

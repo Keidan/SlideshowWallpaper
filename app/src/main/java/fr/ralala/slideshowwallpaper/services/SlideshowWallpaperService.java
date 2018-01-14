@@ -21,6 +21,8 @@ import java.util.concurrent.TimeUnit;
 
 import fr.ralala.slideshowwallpaper.R;
 import fr.ralala.slideshowwallpaper.SlideshowWallpaperApplication;
+import fr.ralala.slideshowwallpaper.sql.AppDatabase;
+import fr.ralala.slideshowwallpaper.sql.Image;
 import fr.ralala.slideshowwallpaper.ui.utils.UIHelper;
 
 /**
@@ -135,84 +137,131 @@ public class SlideshowWallpaperService extends Service implements Runnable {
                             final int startId) {
     performChange();
     if(!mApp.isFrequencyScreen()) {
-      mHandler.postDelayed(this, getDelay());
+      long delay = getDelay();
+      Log.i(getClass().getSimpleName(), "Service delay " + delay);
+      mHandler.postDelayed(this, delay);
     }
     return START_STICKY;
 
   }
 
   /**
+   * Changes the wallpaper.
+   * @param bm The Bitmap to set.
+   * @param scrollable Scrollable wallpaper.
+   * @param idx Current index (log use).
+   * @throws Exception If an error has occurred.
+   */
+  private void changeWallpaper(Bitmap bm, boolean scrollable, int idx) throws Exception {
+    Log.i(getClass().getSimpleName(), "MainScreen -> idx:"+idx+", current:"+mApp.getCurrentFile() + ", bm:"+bm + ", scrollable:"+scrollable);
+    if(!scrollable)
+      mWallpaperManager.setBitmap(bm);
+    else {
+      //get screen height
+      boolean error = false;
+      WindowManager window = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+      if(window != null) {
+        try {
+          Display display = window.getDefaultDisplay();
+          Point size = new Point();
+          display.getSize(size);
+          int screenHeight = size.y;
+          //adjust the aspect ratio of the Image
+          //this is the main part
+          int width = bm.getWidth();
+          int height = bm.getHeight();
+          width = (width * screenHeight) / bm.getHeight();
+          Log.i(getClass().getSimpleName(), "MainScreen -> Src [w:" + bm.getWidth() + ", h:" +
+              bm.getHeight() + "], Screen [w:" + size.x + ", h:" + size.y + "], Dst [w:" + width + ", h:" + height + "]");
+          //set the wallpaper
+          //this may not be the most efficient way but it worked for me
+          mWallpaperManager.setBitmap(Bitmap.createScaledBitmap(bm, width, height, true));
+        } catch (Exception e) {
+          Log.e(getClass().getSimpleName(), "Exception: " + e.getMessage(), e);
+          error = true;
+        }
+      } else
+        error = true;
+      if(error) {
+        Log.e(getClass().getSimpleName(), "MainScreen -> An error occurred with the scrollable wallpaper. Using static wallpaper instead.");
+        mWallpaperManager.setBitmap(bm);
+      }
+    }
+    if(mApp.isLockScreenWallpaper()) {
+      Log.i(getClass().getSimpleName(), "LockScreen -> idx:"+idx+", current:"+mApp.getCurrentFile() + ", bm:"+bm);
+      mWallpaperManager.setBitmap(bm, null, true, WallpaperManager.FLAG_LOCK);
+    }
+  }
+
+  /**
    * Apply the change.
    */
   private void performChange() {
-    Log.d(getClass().getSimpleName(), "performChange");
-    int idx = 0;
-    File folder = new File(mApp.getFolder());
-    File[] files = folder.listFiles();
-    if(files == null) {
-      stopSelf();
-      return;
-    }
-    for(File file : files) {
-      String path = file.getAbsolutePath();
-      if(file.isFile() && isImageFile(path)) {
-        int i = idx;
-        idx++;
-        if(i == mApp.getCurrentFile()) {
-          try {
-            Bitmap bm = BitmapFactory.decodeFile(path);
-            boolean scrollable = mApp.isScrollableWallpaper();
-            Log.i(getClass().getSimpleName(), "MainScreen -> idx:"+idx+", current:"+mApp.getCurrentFile() + ", bm:"+bm + ", scrollable:"+scrollable);
-            if(!scrollable)
-              mWallpaperManager.setBitmap(bm);
-            else {
-              //get screen height
-              boolean error = false;
-              WindowManager window = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
-              if(window != null) {
-                try {
-                  Display display = window.getDefaultDisplay();
-                  Point size = new Point();
-                  display.getSize(size);
-                  int screenHeight = size.y;
-                  //adjust the aspect ratio of the Image
-                  //this is the main part
-                  int width = bm.getWidth();
-                  int height = bm.getHeight();
-                  width = (width * screenHeight) / bm.getHeight();
-                  Log.i(getClass().getSimpleName(), "MainScreen -> Src [w:" + bm.getWidth() + ", h:" +
-                      bm.getHeight() + "], Screen [w:" + size.x + ", h:" + size.y + "], Dst [w:" + width + ", h:" + height + "]");
-                  //set the wallpaper
-                  //this may not be the most efficent way but it worked for me
-                  mWallpaperManager.setBitmap(Bitmap.createScaledBitmap(bm, width, height, true));
-                } catch (Exception e) {
-                  Log.e(getClass().getSimpleName(), "Exception: " + e.getMessage(), e);
-                  error = true;
-                }
-              } else
-                error = true;
-              if(error) {
-                Log.e(getClass().getSimpleName(), "MainScreen -> An error occurred with the scrollable wallpaper. Using static wallpaper instead.");
-                mWallpaperManager.setBitmap(bm);
-              }
+    if(mApp.getBrowseFrom() == SlideshowWallpaperApplication.BROWSE_FROM_FOLDER) {
+      Log.d(getClass().getSimpleName(), "performChange from folder");
+      int idx = 0;
+      File folder = new File(mApp.getFolder());
+      File[] files = folder.listFiles();
+      if (files == null) {
+        stopSelf();
+        return;
+      }
+
+      boolean scrollable = mApp.isScrollableWallpaperFromFolder();
+      for (File file : files) {
+        String path = file.getAbsolutePath();
+        if (file.isFile() && isImageFile(path)) {
+          int i = idx;
+          idx++;
+          if (i == mApp.getCurrentFile()) {
+            try {
+              Bitmap bm = BitmapFactory.decodeFile(path);
+              changeWallpaper(bm, scrollable, idx);
+              break;
+            } catch (Exception e) {
+              String err = getString(R.string.error_unable_to_read_file) + " '" + file.getName() + "'";
+              UIHelper.toast(this, err);
+              Log.e(getClass().getSimpleName(), err, e);
             }
-            if(mApp.isLockScreenWallpaper()) {
-              Log.i(getClass().getSimpleName(), "LockScreen -> idx:"+idx+", current:"+mApp.getCurrentFile() + ", bm:"+bm);
-              mWallpaperManager.setBitmap(bm, null, true, WallpaperManager.FLAG_LOCK);
-            }
-            break;
-          } catch(Exception e) {
-            String err = getString(R.string.error_unable_to_read_file) + " '" + file.getName() + "'";
-            UIHelper.toast(this, err);
-            Log.e(getClass().getSimpleName(), err, e);
           }
         }
       }
+      if (idx >= files.length)
+        idx = 0;
+      if (idx != mApp.getCurrentFile())
+        mApp.setCurrentFile(idx);
+    } else if(mApp.getBrowseFrom() == SlideshowWallpaperApplication.BROWSE_FROM_DATABASE) {
+      Log.d(getClass().getSimpleName(), "performChange from database");
+      AppDatabase appDatabase = AppDatabase.getInstance(this);
+      AppDatabase.listImages(appDatabase, null, (images) -> {
+        int idx = 0;
+        for(int i = 0; i < images.size(); i++) {
+          idx++;
+          if (i == mApp.getCurrentFile()) {
+            Image image = images.get(i);
+            try {
+              if(image.isScrollable()) {
+                Bitmap temp = image.getBitmap();
+                Log.i(getClass().getSimpleName(), "MainScreen -> Original [x:" + image.getX() + ", y:" +
+                    image.getY() + ", w:" + temp.getWidth() + ", h:" + temp.getHeight() + "]");
+                Bitmap part = Bitmap.createBitmap(temp, image.getX(), image.getY(), image.getWidth(), image.getHeight(), null, true);
+                changeWallpaper(part, true, idx);
+              } else
+                changeWallpaper(image.getBitmap(), false, idx);
+              break;
+            } catch (Exception e) {
+              String err = getString(R.string.error_unable_to_read_file) + " '" + image.getName() + "'";
+              UIHelper.toast(this, err);
+              Log.e(getClass().getSimpleName(), err, e);
+            }
+          }
+        }
+        if (idx >= images.size())
+          idx = 0;
+        if (idx != mApp.getCurrentFile())
+          mApp.setCurrentFile(idx);
+      });
     }
-    if(idx >= files.length)
-      idx = 0;
-    if(idx != mApp.getCurrentFile())
-      mApp.setCurrentFile(idx);
   }
 
   /**

@@ -19,19 +19,23 @@ import android.support.v4.app.ActivityCompat;
  */
 public class SlideshowWallpaperApplication extends Application {
   private static final String KEY_FREQUENCY_SCREEN = "frequencyScreen";
-  private static final String KEY_SCROLLABLE_WALLPAPER = "scrollableWallpaper";
+  private static final String KEY_SCROLLABLE_WALLPAPER_FROM_FOLDER = "scrollableWallpaperFromFolder";
   private static final String KEY_LOCK_SCREEN_WALLPAPER = "lockScreenWallpaper";
   private static final String KEY_FREQUENCY_VAL = "frequencyValue";
   private static final String KEY_FREQUENCY_UNIT = "frequencyUnit";
   private static final String KEY_FOLDER = "folder";
   private static final String KEY_CURRENT_FILE = "current";
+  private static final String KEY_BROWSE_FROM = "browseFrom";
   private static final int DEFAULT_FREQUENCY_VAL = 0;
   private static final int DEFAULT_FREQUENCY_UNIT = 0;
   private static final boolean DEFAULT_FREQUENCY_SCREEN = true;
-  private static final boolean DEFAULT_SCROLLABLE_WALLPAPER = false;
+  private static final boolean DEFAULT_SCROLLABLE_WALLPAPER_FROM_FOLDER = false;
   private static final boolean DEFAULT_LOCK_SCREEN_WALLPAPER = false;
   private static final String DEFAULT_FOLDER = "";
-  private static final int DEFAULT_CURRENT_FILE = 0;
+  public static final int DEFAULT_CURRENT_FILE = 0;
+  public static final int BROWSE_FROM_FOLDER = 0;
+  public static final int BROWSE_FROM_DATABASE = 1;
+  private static final int DEFAULT_BROWSE_FROM = BROWSE_FROM_FOLDER;
   private boolean mSenpuku = false;
   private SharedPreferences mPrefs;
 
@@ -65,6 +69,25 @@ public class SlideshowWallpaperApplication extends Application {
    */
   public void setSenpuku(boolean senpuku) {
     mSenpuku = senpuku;
+  }
+
+
+  /**
+   * Sets the browse from value.
+   * @param browseFrom The new value.
+   */
+  public void setBrowseFrom(int browseFrom) {
+    SharedPreferences.Editor e = mPrefs.edit();
+    e.putInt(KEY_BROWSE_FROM, browseFrom);
+    e.apply();
+  }
+
+  /**
+   * Returns the browse from value.
+   * @return int
+   */
+  public int getBrowseFrom() {
+    return mPrefs.getInt(KEY_BROWSE_FROM, DEFAULT_BROWSE_FROM);
   }
 
   /**
@@ -143,9 +166,9 @@ public class SlideshowWallpaperApplication extends Application {
    * Sets the scrollable wallpaper.
    * @param scrollableWallpaper The new value.
    */
-  public void setScrollableWallpaper(boolean scrollableWallpaper) {
+  public void setScrollableWallpaperFromFolder(boolean scrollableWallpaper) {
     SharedPreferences.Editor e = mPrefs.edit();
-    e.putBoolean(KEY_SCROLLABLE_WALLPAPER, scrollableWallpaper);
+    e.putBoolean(KEY_SCROLLABLE_WALLPAPER_FROM_FOLDER, scrollableWallpaper);
     e.apply();
   }
 
@@ -153,8 +176,8 @@ public class SlideshowWallpaperApplication extends Application {
    * Returns the scrollable wallpaper state.
    * @return boolean
    */
-  public boolean isScrollableWallpaper() {
-    return mPrefs.getBoolean(KEY_SCROLLABLE_WALLPAPER, DEFAULT_SCROLLABLE_WALLPAPER);
+  public boolean isScrollableWallpaperFromFolder() {
+    return mPrefs.getBoolean(KEY_SCROLLABLE_WALLPAPER_FROM_FOLDER, DEFAULT_SCROLLABLE_WALLPAPER_FROM_FOLDER);
   }
 
   /**

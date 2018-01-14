@@ -1,6 +1,10 @@
 package fr.ralala.slideshowwallpaper.ui.chooser;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,7 +44,7 @@ public class FileChooserArrayAdapter extends ArrayAdapter<FileChooserOption> {
    * @param textViewResourceId The resource id of the container.
    * @param objects The objects list.
    */
-  public FileChooserArrayAdapter(final Context context, final int textViewResourceId,
+  FileChooserArrayAdapter(final Context context, final int textViewResourceId,
                                  final List<FileChooserOption> objects) {
     super(context, textViewResourceId, objects);
     mContext = context;
@@ -101,9 +105,18 @@ public class FileChooserArrayAdapter extends ArrayAdapter<FileChooserOption> {
     }
     final FileChooserOption o = mItems.get(position);
     if (o != null) {
-      holder.icon.setImageDrawable(o.getIcon());
       holder.name.setText(o.getName());
       holder.data.setText(o.getData());
+
+      if(o.isPreview()) {
+        holder.icon.post(() -> {
+          Bitmap bitmap = BitmapFactory.decodeFile(o.getPath());
+          Drawable drawable = new BitmapDrawable(mContext.getResources(), Bitmap.createScaledBitmap(bitmap, 72, 72, true));
+          holder.icon.setImageDrawable(drawable);
+        });
+      } else
+        holder.icon.setImageDrawable(o.getIcon());
+
     }
     return v;
   }

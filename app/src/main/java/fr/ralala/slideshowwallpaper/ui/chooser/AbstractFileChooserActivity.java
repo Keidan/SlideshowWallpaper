@@ -38,12 +38,15 @@ public abstract class AbstractFileChooserActivity extends AppCompatActivity impl
   public static final String FILECHOOSER_FILE_FILTER_KEY = "file_filter";
   public static final String FILECHOOSER_DEFAULT_DIR = "default_dir";
   public static final String FILECHOOSER_USER_MESSAGE = "user_message";
+  public static final String FILECHOOSER_PREVIEW = "preview";
   public static final int FILECHOOSER_TYPE_FILE_ONLY = 0;
   public static final int FILECHOOSER_TYPE_DIRECTORY_ONLY  = 1;
   public static final int FILECHOOSER_TYPE_FILE_AND_DIRECTORY = 2;
   public static final int FILECHOOSER_SHOW_DIRECTORY_ONLY = 1;
   public static final int FILECHOOSER_SHOW_FILE_AND_DIRECTORY = 2;
   public static final String FILECHOOSER_FILE_FILTER_ALL = "*";
+  public static final boolean FILECHOOSER_PREVIEW_YES = true;
+  public static final boolean FILECHOOSER_PREVIEW_NO = false;
   protected File mCurrentDir = null;
   protected File mDefaultDir = null;
   private FileChooserArrayAdapter mAdapter = null;
@@ -51,6 +54,7 @@ public abstract class AbstractFileChooserActivity extends AppCompatActivity impl
   private String mConfirmTitle = null;
   private String mUserMessage = null;
   private String mFileFilter = FILECHOOSER_FILE_FILTER_ALL;
+  private boolean mPreview = FILECHOOSER_PREVIEW_NO;
   private int mType = FILECHOOSER_TYPE_FILE_AND_DIRECTORY;
   private int mShow = FILECHOOSER_SHOW_FILE_AND_DIRECTORY;
   private ListView mListview = null;
@@ -92,6 +96,8 @@ public abstract class AbstractFileChooserActivity extends AppCompatActivity impl
       mDefaultDir = new File(""+b.getString(FILECHOOSER_DEFAULT_DIR));
     if (b != null && b.containsKey(FILECHOOSER_USER_MESSAGE))
       mUserMessage = b.getString(FILECHOOSER_USER_MESSAGE);
+    if (b != null && b.containsKey(FILECHOOSER_PREVIEW))
+      mPreview = b.getBoolean(FILECHOOSER_PREVIEW);
     if(mConfirmTitle == null) mConfirmTitle = "title";
     if(mConfirmMessage == null) mConfirmMessage = "message";
     mCurrentDir = mDefaultDir;
@@ -126,11 +132,12 @@ public abstract class AbstractFileChooserActivity extends AppCompatActivity impl
     try {
       for (final File ff : dirs) {
         if (ff.isDirectory())
-          dir.add(new FileChooserOption(ff.getName(), getString(R.string.chooser_folder), ff.getAbsolutePath(), ContextCompat.getDrawable(this, ic_folder)));
+          dir.add(new FileChooserOption(ff.getName(), getString(R.string.chooser_folder), ff.getAbsolutePath(), ContextCompat.getDrawable(this, ic_folder), false));
         else if(mShow != FILECHOOSER_SHOW_DIRECTORY_ONLY) {
-          if(isFiltered(ff))
+          if(isFiltered(ff)) {
             fls.add(new FileChooserOption(ff.getName(), getString(R.string.chooser_file_size) + ": " + getSizeToHuman(ff.length()), ff
-                .getAbsolutePath(), ContextCompat.getDrawable(this, ic_file)));
+                .getAbsolutePath(), ContextCompat.getDrawable(this, ic_file), mPreview));
+          }
         }
       }
     } catch (final Exception e) {
@@ -143,7 +150,7 @@ public abstract class AbstractFileChooserActivity extends AppCompatActivity impl
     }
     dir.add(
         0,
-        new FileChooserOption("..", getString(R.string.chooser_parent_directory), f.getParent(), ContextCompat.getDrawable(this, ic_folder)));
+        new FileChooserOption("..", getString(R.string.chooser_parent_directory), f.getParent(), ContextCompat.getDrawable(this, ic_folder), false));
     mAdapter = new FileChooserArrayAdapter(this, R.layout.file_view, dir);
     mListview.setAdapter(mAdapter);
   }
@@ -174,9 +181,9 @@ public abstract class AbstractFileChooserActivity extends AppCompatActivity impl
   public boolean isFiltered(final File file) {
     StringTokenizer token = new StringTokenizer(mFileFilter, ",");
     while(token.hasMoreTokens()) {
-      String filter = token.nextToken();
+      String filter = token.nextToken().toLowerCase();
       if(filter.equals("*")) return true;
-      if(file.getName().endsWith("." + filter)) return true;
+      if(file.getName().toLowerCase().endsWith("." + filter)) return true;
     }
     return false;
   }

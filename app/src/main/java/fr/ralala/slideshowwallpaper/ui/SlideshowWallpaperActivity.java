@@ -1,4 +1,4 @@
-package fr.ralala.slideshowwallpaper.ui.activities;
+package fr.ralala.slideshowwallpaper.ui;
 
 import android.Manifest;
 import android.app.ActivityManager;
@@ -16,6 +16,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
@@ -30,6 +31,7 @@ import fr.ralala.slideshowwallpaper.services.SlideshowWallpaperService;
 import fr.ralala.slideshowwallpaper.ui.changelog.ChangeLog;
 import fr.ralala.slideshowwallpaper.ui.changelog.Configuration;
 import fr.ralala.slideshowwallpaper.ui.chooser.FileChooserActivity;
+import fr.ralala.slideshowwallpaper.ui.images.ManageImagesActivity;
 import fr.ralala.slideshowwallpaper.ui.utils.UIHelper;
 
 /**
@@ -46,15 +48,18 @@ public class SlideshowWallpaperActivity extends AppCompatActivity implements Ada
   private Spinner mSpFrequencyValue;
   private Spinner mSpFrequencyUnit;
   private CheckBox mCkFrequency;
-  private CheckBox mCkScrollableWallpaper;
+  private CheckBox mCkScrollableWallpaperFromFolder;
   private CheckBox mCkLockScreenWallpaper;
   private SlideshowWallpaperApplication mApp;
   private ToggleButton mToggleOnOff;
-  private Button mBtBrowse;
-  private TextView tvBrowse;
-  private TextView tvFrequency;
+  private Button mBtBrowseFromFolder;
+  private TextView mTvBrowseFromFolder;
+  private TextView mTvFrequency;
   private ArrayAdapter<Integer> mAdapterFrequencyValue;
   private ChangeLog mChangeLog;
+  private RadioButton mRbBrowseFromFolder;
+  private RadioButton mRbBrowseFromDatabase;
+  private Button mBtBrowseFromDatabase;
 
   /**
    * Called when the activity is created.
@@ -67,14 +72,15 @@ public class SlideshowWallpaperActivity extends AppCompatActivity implements Ada
     setContentView(R.layout.activity_slideshow_wallpaper);
     mApp = (SlideshowWallpaperApplication)getApplication();
 
+    mRbBrowseFromFolder = findViewById(R.id.rbBrowseFromFolder);
+    mRbBrowseFromDatabase = findViewById(R.id.rbBrowseFromDatabase);
     mCkFrequency = findViewById(R.id.ckFrequency);
-    mCkScrollableWallpaper = findViewById(R.id.ckScrollableWallpaper);
+    mCkScrollableWallpaperFromFolder = findViewById(R.id.ckScrollableWallpaperFromFolder);
     mCkLockScreenWallpaper = findViewById(R.id.ckLockScreenWallpaper);
     mSpFrequencyValue = findViewById(R.id.spFrequencyValue);
     mSpFrequencyUnit = findViewById(R.id.spFrequencyUnit);
-    tvBrowse = findViewById(R.id.tvBrowse);
-    tvFrequency = findViewById(R.id.tvFrequency);
-
+    mTvBrowseFromFolder = findViewById(R.id.tvBrowseFromFolder);
+    mTvFrequency = findViewById(R.id.tvFrequency);
     List<Integer> items = new ArrayList<>();
     mAdapterFrequencyValue = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, items);
     mSpFrequencyValue.setAdapter(mAdapterFrequencyValue);
@@ -82,18 +88,20 @@ public class SlideshowWallpaperActivity extends AppCompatActivity implements Ada
     fillValues();
     mSpFrequencyUnit.setSelection(mApp.getFrequencyUnit());
     mCkFrequency.setChecked(mApp.isFrequencyScreen());
-    mCkScrollableWallpaper.setChecked(mApp.isScrollableWallpaper());
+    mCkScrollableWallpaperFromFolder.setChecked(mApp.isScrollableWallpaperFromFolder());
     mCkLockScreenWallpaper.setChecked(mApp.isLockScreenWallpaper());
     mSpFrequencyValue.setOnItemSelectedListener(this);
     mSpFrequencyUnit.setOnItemSelectedListener(this);
     mCkFrequency.setOnCheckedChangeListener(this);
-    mCkScrollableWallpaper.setOnCheckedChangeListener(this);
+    mCkScrollableWallpaperFromFolder.setOnCheckedChangeListener(this);
     mCkLockScreenWallpaper.setOnCheckedChangeListener(this);
+    mRbBrowseFromFolder.setOnCheckedChangeListener(this);
+    mRbBrowseFromDatabase.setOnCheckedChangeListener(this);
 
     changeEnabledStateOnScreenCheckbox();
 
-    mBtBrowse = findViewById(R.id.btBrowse);
-    mBtBrowse.setOnClickListener((v) -> {
+    mBtBrowseFromFolder = findViewById(R.id.btBrowseFromFolder);
+    mBtBrowseFromFolder.setOnClickListener((v) -> {
       if(SlideshowWallpaperApplication.checkPermissions(this)) {
         final Intent intent = new Intent(getApplicationContext(), FileChooserActivity.class);
         intent.putExtra(FileChooserActivity.FILECHOOSER_TYPE_KEY, "" + FileChooserActivity.FILECHOOSER_TYPE_DIRECTORY_ONLY);
@@ -105,6 +113,12 @@ public class SlideshowWallpaperActivity extends AppCompatActivity implements Ada
       } else {
         UIHelper.showAlertDialog(this, R.string.error_title, R.string.error_permission_message);
       }
+    });
+    mBtBrowseFromDatabase = findViewById(R.id.btBrowseFromDatabase);
+    mBtBrowseFromDatabase.setOnClickListener((v) -> {
+      UIHelper.closeTransition(this);
+      Intent intent = new Intent(this, ManageImagesActivity.class);
+      startActivity(intent);
     });
 
     mToggleOnOff = findViewById(R.id.toggleOnOff);
@@ -127,6 +141,7 @@ public class SlideshowWallpaperActivity extends AppCompatActivity implements Ada
             mToggleOnOff.setChecked(false);
           } else {
             killServiceIfRunning(SERVICE);
+            mApp.setCurrentFile(SlideshowWallpaperApplication.DEFAULT_CURRENT_FILE);
             ((SlideshowWallpaperApplication) getApplication()).setSenpuku(false);
             startService(new Intent(this, SERVICE));
           }
@@ -135,7 +150,7 @@ public class SlideshowWallpaperActivity extends AppCompatActivity implements Ada
       changeEnabledStateOnServiceStart();
     });
 
-    tvBrowse.setText(
+    mTvBrowseFromFolder.setText(
         mApp.getFolder().equals("") ? getString(R.string.select_folder_none) : mApp.getFolder());
     /* permissions */
     ActivityCompat.requestPermissions(this, new String[]{
@@ -154,6 +169,8 @@ public class SlideshowWallpaperActivity extends AppCompatActivity implements Ada
             R.string.changelog_show_full), this);
     if(mChangeLog.firstRun())
       mChangeLog.getLogDialog().show();
+
+    changeBrowseFromState(mApp.getBrowseFrom());
   }
 
   /**
@@ -183,6 +200,22 @@ public class SlideshowWallpaperActivity extends AppCompatActivity implements Ada
   }
 
   /**
+   * Fill the adapter.
+   * @param val The current value.
+   * @param min The min value.
+   * @param max The max value.
+   * @return The index.
+   */
+  private int fillAdapter(int val, int min, int max) {
+    int idx = 0;
+    for(int i = min; i < max; i++) {
+      mAdapterFrequencyValue.add(i);
+      if(i <= val) idx++;
+    }
+    return idx;
+  }
+
+  /**
    * Fill the values.
    */
   private void fillValues() {
@@ -197,28 +230,16 @@ public class SlideshowWallpaperActivity extends AppCompatActivity implements Ada
     int val = mApp.getFrequencyValue();
     switch (mApp.getFrequencyUnit()) {
       case 0:
-        for(int i = 30; i < 60; i++) {
-          mAdapterFrequencyValue.add(i);
-          if(i <= val) idx++;
-        }
+        idx = fillAdapter(val, 30, 60);
         break;
       case 1:
-        for(int i = 1; i < 60; i++) {
-          mAdapterFrequencyValue.add(i);
-          if(i <= val) idx++;
-        }
+        idx = fillAdapter(val, 1, 60);
         break;
       case 2:
-        for(int i = 1; i < 24; i++) {
-          mAdapterFrequencyValue.add(i);
-          if(i <= val) idx++;
-        }
+        idx = fillAdapter(val, 1, 24);
         break;
       case 3:
-        for(int i = 1; i <= 30; i++) {
-          mAdapterFrequencyValue.add(i);
-          if(i <= val) idx++;
-        }
+        idx = fillAdapter(val, 1, 31);
         break;
     }
     try {
@@ -234,17 +255,52 @@ public class SlideshowWallpaperActivity extends AppCompatActivity implements Ada
   private void changeEnabledStateOnServiceStart() {
     final boolean enable = !mToggleOnOff.isChecked();
     mCkFrequency.setEnabled(enable);
-    mCkScrollableWallpaper.setEnabled(enable);
     mCkLockScreenWallpaper.setEnabled(enable);
-    mBtBrowse.setEnabled(enable);
-    tvBrowse.setEnabled(enable);
+    mBtBrowseFromFolder.setEnabled(enable);
+    mTvBrowseFromFolder.setEnabled(enable);
+    mRbBrowseFromDatabase.setEnabled(enable);
+    mRbBrowseFromFolder.setEnabled(enable);
     if(enable) {
       changeEnabledStateOnScreenCheckbox();
+      if(mRbBrowseFromFolder.isChecked()) {
+        changeBrowseFromState(SlideshowWallpaperApplication.BROWSE_FROM_FOLDER);
+      } else if(mRbBrowseFromDatabase.isChecked()) {
+        changeBrowseFromState(SlideshowWallpaperApplication.BROWSE_FROM_DATABASE);
+      }
     } else {
-      tvFrequency.setEnabled(false);
+      mCkScrollableWallpaperFromFolder.setEnabled(false);
+      mTvFrequency.setEnabled(false);
       mSpFrequencyValue.setEnabled(false);
       mSpFrequencyUnit.setEnabled(false);
+      mBtBrowseFromDatabase.setEnabled(false);
+      mTvBrowseFromFolder.setEnabled(false);
+      mBtBrowseFromFolder.setEnabled(false);
     }
+  }
+
+
+  /**
+   * Changes the state of the browse components.
+   * @param from Browse from ?
+   */
+  private void changeBrowseFromState(int from) {
+    if(from == SlideshowWallpaperApplication.BROWSE_FROM_DATABASE) {
+      mRbBrowseFromDatabase.setChecked(true);
+      mRbBrowseFromFolder.setChecked(false);
+      mBtBrowseFromDatabase.setEnabled(true);
+      mTvBrowseFromFolder.setEnabled(false);
+      mBtBrowseFromFolder.setEnabled(false);
+      mCkScrollableWallpaperFromFolder.setEnabled(false);
+    } else if(from == SlideshowWallpaperApplication.BROWSE_FROM_FOLDER) {
+      mRbBrowseFromDatabase.setChecked(false);
+      mRbBrowseFromFolder.setChecked(true);
+      mBtBrowseFromDatabase.setEnabled(false);
+      mTvBrowseFromFolder.setEnabled(true);
+      mBtBrowseFromFolder.setEnabled(true);
+      mCkScrollableWallpaperFromFolder.setEnabled(true);
+    }
+    if(from != mApp.getBrowseFrom())
+      mApp.setBrowseFrom(from);
   }
 
   /**
@@ -254,7 +310,8 @@ public class SlideshowWallpaperActivity extends AppCompatActivity implements Ada
     boolean enable = !mCkFrequency.isChecked();
     mSpFrequencyValue.setEnabled(enable);
     mSpFrequencyUnit.setEnabled(enable);
-    tvFrequency.setEnabled(enable);
+    mTvFrequency.setEnabled(enable);
+    mCkScrollableWallpaperFromFolder.setEnabled(enable);
   }
 
   /**
@@ -283,7 +340,7 @@ public class SlideshowWallpaperActivity extends AppCompatActivity implements Ada
         String folder = mApp.getFolder();
         if(!folder.equals(rootDir)) {
           mApp.setFolder(rootDir);
-          tvBrowse.setText(mApp.getFolder());
+          mTvBrowseFromFolder.setText(mApp.getFolder());
         }
       }
     }
@@ -303,10 +360,19 @@ public class SlideshowWallpaperActivity extends AppCompatActivity implements Ada
     if(compoundButton.getId() == R.id.ckFrequency) {
       changeEnabledStateOnScreenCheckbox();
       mApp.setFrequencyScreen(mCkFrequency.isChecked());
-    } else if(compoundButton.getId() == R.id.ckScrollableWallpaper)
-      mApp.setScrollableWallpaper(mCkScrollableWallpaper.isChecked());
+    } else if(compoundButton.getId() == R.id.ckScrollableWallpaperFromFolder)
+      mApp.setScrollableWallpaperFromFolder(mCkScrollableWallpaperFromFolder.isChecked());
     else if(compoundButton.getId() == R.id.ckLockScreenWallpaper)
       mApp.setLockScreenWallpaper(mCkLockScreenWallpaper.isChecked());
+    else if(compoundButton.getId() == R.id.rbBrowseFromFolder) {
+      if(mRbBrowseFromFolder.isChecked()) {
+        changeBrowseFromState(SlideshowWallpaperApplication.BROWSE_FROM_FOLDER);
+      }
+    } else if(compoundButton.getId() == R.id.rbBrowseFromDatabase) {
+      if(mRbBrowseFromDatabase.isChecked()) {
+        changeBrowseFromState(SlideshowWallpaperApplication.BROWSE_FROM_DATABASE);
+      }
+    }
   }
 
   @Override

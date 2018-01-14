@@ -165,14 +165,6 @@ public class ChangeLog {
     editor.apply();
   }
 
-  /**
-   * Returns HTML displaying the changes since the previous installed version of your app (what's new).
-   * @return String
-   */
-  public String getLog() {
-    return this.getLog(false);
-  }
-
   /** modes for HTML-Lists (bullet, numbered) */
   private enum ListMode {
     NONE, ORDERED, UNORDERED,

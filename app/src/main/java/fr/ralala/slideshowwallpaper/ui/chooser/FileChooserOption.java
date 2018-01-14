@@ -20,6 +20,7 @@ public class FileChooserOption implements Comparable<FileChooserOption> {
   private String mData;
   private String mPath;
   private Drawable mIcon;
+  private boolean mPreview;
 
   /**
    * Creates a new chooser option.
@@ -27,12 +28,22 @@ public class FileChooserOption implements Comparable<FileChooserOption> {
    * @param d The option data.
    * @param p The option path.
    * @param i The option icon.
+   * @param preview True for image preview.
    */
-  public FileChooserOption(final String n, final String d, final String p, final Drawable i) {
+  FileChooserOption(final String n, final String d, final String p, final Drawable i, boolean preview) {
     mName = n;
     mData = d;
     mPath = p;
     mIcon = i;
+    mPreview = preview;
+  }
+
+  /**
+   * Returns true if a preview must be used.
+   * @return boolean
+   */
+  boolean isPreview() {
+    return mPreview;
   }
 
   /**
@@ -55,7 +66,7 @@ public class FileChooserOption implements Comparable<FileChooserOption> {
    * Returns the path.
    * @return String
    */
-  public String getPath() {
+  String getPath() {
     return mPath;
   }
 

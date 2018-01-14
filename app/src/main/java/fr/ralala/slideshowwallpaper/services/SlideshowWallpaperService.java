@@ -166,10 +166,12 @@ public class SlideshowWallpaperService extends Service implements Runnable {
           Point size = new Point();
           display.getSize(size);
           int screenHeight = size.y;
+          int screenWidth = size.x;
           //adjust the aspect ratio of the Image
           //this is the main part
           int width = bm.getWidth();
           int height = bm.getHeight();
+          height = (height * screenWidth / bm.getWidth());
           width = (width * screenHeight) / bm.getHeight();
           Log.i(getClass().getSimpleName(), "MainScreen -> Src [w:" + bm.getWidth() + ", h:" +
               bm.getHeight() + "], Screen [w:" + size.x + ", h:" + size.y + "], Dst [w:" + width + ", h:" + height + "]");

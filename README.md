@@ -5,9 +5,9 @@ SlideshowWallpaper
 
 This application allows to modify the wallpaper of android using a slideshow method.
 
-Slideshow images are selectable by single directory.
+Slideshow images can be selected by single directory or by creating a custom database.
 
-The frequency of modification of the wallpaper is done either on timers or when the screen is turned on/off.
+The frequency of changing the wallpaper is done either on timers or when the screen is on / off.
 
 Wallpaper can scroll when changing home screen.
 

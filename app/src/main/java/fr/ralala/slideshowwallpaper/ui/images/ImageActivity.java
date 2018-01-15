@@ -1,11 +1,16 @@
 package fr.ralala.slideshowwallpaper.ui.images;
 
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageView;
 
 import fr.ralala.slideshowwallpaper.R;
@@ -36,21 +41,36 @@ public class ImageActivity  extends AppCompatActivity {
   protected void onCreate(Bundle savedInstanceState) {
     UIHelper.openTransition(this);
 
+
     mAppDatabase = AppDatabase.getInstance(this);
     if(getIntent().getExtras() != null) {
       Bundle extras = getIntent().getExtras();
       AppDatabase.findImage(mAppDatabase, this, extras.getString(KEY_NAME), (image) -> mImage = image);
     }
     super.onCreate(savedInstanceState);
+    requestWindowFeature(Window.FEATURE_NO_TITLE);
+    Window w = getWindow(); // in Activity's onCreate() for instance
+    w.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+    w.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
     setContentView(R.layout.activity_image);
 
-    android.support.v7.app.ActionBar actionBar = getDelegate().getSupportActionBar();
-    if(actionBar != null) {
-      actionBar.setDisplayShowHomeEnabled(true);
-      actionBar.setDisplayHomeAsUpEnabled(true);
+    Toolbar toolbar = findViewById(R.id.tool_bar);
+    setSupportActionBar(toolbar);
+
+    if(toolbar != null) {
+      toolbar.setTitle("");
+      ActionBar actionbar = getSupportActionBar();
+      if(actionbar != null) {
+        actionbar.setDisplayHomeAsUpEnabled(true);
+        actionbar.setDisplayShowHomeEnabled(true);
+      }
     }
     ImageView iv = findViewById(R.id.image);
-    iv.postDelayed(() -> iv.setImageDrawable(new BitmapDrawable(getResources(), mImage.getBitmap())), DELAY_MS);
+    iv.postDelayed(() -> {
+      if(toolbar != null)
+        toolbar.setTitle(mImage.getName());
+      iv.setImageDrawable(new BitmapDrawable(getResources(), mImage.getBitmap()));
+    }, DELAY_MS);
   }
 
   /**

@@ -24,7 +24,10 @@
         </activity>
         <activity android:name=".ui.chooser.FileChooserActivity"/>
         <activity android:name=".ui.images.ManageImagesActivity"/>
-        <activity android:name=".ui.images.ImageActivity"/>
+        <activity android:name=".ui.images.ImageActivity"
+            android:theme="@style/AppTheme.Image"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|screenSize"/>
 
         <service
             android:name=".services.SlideshowWallpaperService"

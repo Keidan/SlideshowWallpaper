@@ -15,4 +15,5 @@
     <color name="textColorDisabled">#FF9E9E9E</color>
     <color name="colorAccentDisabled">#FF76A6B6</color>
     <color name="colorScrollable">#FFE7D759</color>
+    <color name="transparent">@android:color/transparent</color>
 </resources>

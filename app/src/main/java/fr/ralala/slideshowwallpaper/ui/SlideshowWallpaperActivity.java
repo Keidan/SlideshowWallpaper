@@ -32,6 +32,7 @@ import fr.ralala.slideshowwallpaper.ui.changelog.ChangeLog;
 import fr.ralala.slideshowwallpaper.ui.changelog.Configuration;
 import fr.ralala.slideshowwallpaper.ui.chooser.FileChooserActivity;
 import fr.ralala.slideshowwallpaper.ui.images.ManageImagesActivity;
+import fr.ralala.slideshowwallpaper.services.utils.ServiceStartupTaskFromUI;
 import fr.ralala.slideshowwallpaper.ui.utils.UIHelper;
 
 /**
@@ -125,7 +126,7 @@ public class SlideshowWallpaperActivity extends AppCompatActivity implements Ada
     mToggleOnOff.setChecked(isServiceRunning(SERVICE));
     mToggleOnOff.setOnClickListener((v) -> {
       if(!mToggleOnOff.isChecked()) {
-        ((SlideshowWallpaperApplication)getApplication()).setSenpuku(true);
+        ((SlideshowWallpaperApplication)getApplication()).getServiceUtils().setSenpuku(true);
         stopService(new Intent(this, SERVICE));
         mApp.setCurrentFile(0);
       } else {
@@ -142,8 +143,17 @@ public class SlideshowWallpaperActivity extends AppCompatActivity implements Ada
           } else {
             killServiceIfRunning(SERVICE);
             mApp.setCurrentFile(SlideshowWallpaperApplication.DEFAULT_CURRENT_FILE);
-            ((SlideshowWallpaperApplication) getApplication()).setSenpuku(false);
-            startService(new Intent(this, SERVICE));
+            ((SlideshowWallpaperApplication) getApplication()).getServiceUtils().setSenpuku(false);
+            new ServiceStartupTaskFromUI(this, (start) -> {
+              if(!start) {
+                UIHelper.showAlertDialog(this, R.string.error_title,
+                    getString(R.string.error_start_service));
+                mToggleOnOff.setChecked(false);
+                ((SlideshowWallpaperApplication) getApplication()).getServiceUtils().setSenpuku(true);
+                stopService(new Intent(this, SERVICE));
+                changeEnabledStateOnServiceStart();
+              }
+            }).execute();
           }
         }
       }
@@ -320,7 +330,7 @@ public class SlideshowWallpaperActivity extends AppCompatActivity implements Ada
   @Override
   public void onResume() {
     super.onResume();
-    if(isServiceRunning(SERVICE)) {
+    if(isServiceRunning(SlideshowWallpaperActivity.SERVICE)) {
       mToggleOnOff.setChecked(true);
       changeEnabledStateOnServiceStart();
     }

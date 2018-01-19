@@ -8,6 +8,8 @@ import android.content.pm.PackageManager;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 
+import fr.ralala.slideshowwallpaper.services.utils.ServiceUtils;
+
 /**
  *******************************************************************************
  * <p><b>Project Slideshow Wallpaper</b><br/>
@@ -27,7 +29,7 @@ public class SlideshowWallpaperApplication extends Application {
   private static final String KEY_CURRENT_FILE = "current";
   private static final String KEY_BROWSE_FROM = "browseFrom";
   private static final int DEFAULT_FREQUENCY_VAL = 0;
-  private static final int DEFAULT_FREQUENCY_UNIT = 0;
+  private static final int DEFAULT_FREQUENCY_UNIT = 1;
   private static final boolean DEFAULT_FREQUENCY_SCREEN = true;
   private static final boolean DEFAULT_SCROLLABLE_WALLPAPER_FROM_FOLDER = false;
   private static final boolean DEFAULT_LOCK_SCREEN_WALLPAPER = false;
@@ -36,8 +38,8 @@ public class SlideshowWallpaperApplication extends Application {
   public static final int BROWSE_FROM_FOLDER = 0;
   public static final int BROWSE_FROM_DATABASE = 1;
   private static final int DEFAULT_BROWSE_FROM = BROWSE_FROM_FOLDER;
-  private boolean mSenpuku = false;
   private SharedPreferences mPrefs;
+  private ServiceUtils mServiceUtils;
 
   @Override
   public void onCreate() {
@@ -55,23 +57,16 @@ public class SlideshowWallpaperApplication extends Application {
         ActivityCompat.checkSelfPermission(c, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
         ActivityCompat.checkSelfPermission(c, Manifest.permission.RECEIVE_BOOT_COMPLETED) == PackageManager.PERMISSION_GRANTED;
   }
-  /**
-   * Returns the senpuku status.
-   * @return boolean
-   */
-  public boolean isSenpuku() {
-    return mSenpuku;
-  }
 
   /**
-   * Sets the senpuku status.
-   * @param senpuku The new value.
+   * Returns the instance of the service utils.
+   * @return ServiceUtils
    */
-  public void setSenpuku(boolean senpuku) {
-    mSenpuku = senpuku;
+  public ServiceUtils getServiceUtils() {
+    if(mServiceUtils == null)
+      mServiceUtils = new ServiceUtils();
+    return mServiceUtils;
   }
-
-
   /**
    * Sets the browse from value.
    * @param browseFrom The new value.

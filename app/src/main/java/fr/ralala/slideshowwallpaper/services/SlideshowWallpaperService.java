@@ -64,6 +64,8 @@ public class SlideshowWallpaperService extends Service implements Runnable {
   public void onCreate() {
     super.onCreate();
     boolean kill = false;
+    mApp = ((SlideshowWallpaperApplication) getApplication());
+    mApp.getServiceUtils().setCreated(true);
     if(!SlideshowWallpaperApplication.checkPermissions(this)) {
       String err = getString(R.string.error_permissions_not_granted);
       UIHelper.toast(this, err);
@@ -71,7 +73,6 @@ public class SlideshowWallpaperService extends Service implements Runnable {
       kill = true;
     }
     if(!kill) {
-      mApp = ((SlideshowWallpaperApplication) getApplication());
       if (mApp.getFolder().isEmpty()) {
         kill = true;
       } else {
@@ -98,7 +99,7 @@ public class SlideshowWallpaperService extends Service implements Runnable {
       }
     }
     if(kill) {
-      mApp.setSenpuku(true);
+      mApp.getServiceUtils().setSenpuku(true);
       stopSelf();
     }
   }
@@ -114,7 +115,9 @@ public class SlideshowWallpaperService extends Service implements Runnable {
       unregisterReceiver(mScreenReceiver);
       mScreenReceiver = null;
     }
-    if (!mApp.isSenpuku()) {
+    mApp.getServiceUtils().setCreated(false);
+    mApp.getServiceUtils().setStarted(false);
+    if (!mApp.getServiceUtils().isSenpuku()) {
       Log.i(getClass().getSimpleName(), "Restart service.");
       /* restart the activity */
       final Intent intent = new Intent(this, RestartServiceReceiver.class);
@@ -135,12 +138,14 @@ public class SlideshowWallpaperService extends Service implements Runnable {
   @Override
   public int onStartCommand(final Intent intent, final int flags,
                             final int startId) {
-    performChange();
-    if(!mApp.isFrequencyScreen()) {
-      long delay = getDelay();
-      Log.i(getClass().getSimpleName(), "Service delay " + delay);
-      mHandler.postDelayed(this, delay);
-    }
+    new Thread(() -> {
+      performChange();
+      if(!mApp.isFrequencyScreen()) {
+        long delay = getDelay();
+        Log.i(getClass().getSimpleName(), "Service delay " + delay);
+        mHandler.postDelayed(this, delay);
+      }
+    }).start();
     return START_STICKY;
 
   }
@@ -264,6 +269,7 @@ public class SlideshowWallpaperService extends Service implements Runnable {
           mApp.setCurrentFile(idx);
       });
     }
+    mApp.getServiceUtils().setStarted(true);
   }
 
   /**

@@ -6,6 +6,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,10 +29,10 @@ import fr.ralala.slideshowwallpaper.R;
  *******************************************************************************
  */
 public class FileChooserArrayAdapter extends ArrayAdapter<FileChooserOption> {
-
   private final Context mContext;
   private final int mId;
   private final List<FileChooserOption> mItems;
+  private SparseBooleanArray mSelectedItemsIds;
 
   private class ViewHolder {
     ImageView icon;
@@ -50,6 +52,61 @@ public class FileChooserArrayAdapter extends ArrayAdapter<FileChooserOption> {
     mContext = context;
     mId = textViewResourceId;
     mItems = objects;
+    mSelectedItemsIds = new SparseBooleanArray();
+  }
+
+  /**
+   * Toggles the item selection.
+   * @param position Item position.
+   */
+  void toggleSelection(int position) {
+    selectView(position, !mSelectedItemsIds.get(position));
+  }
+
+  /**
+   * Removes the item selection.
+   */
+  void removeSelection() {
+    mSelectedItemsIds = new SparseBooleanArray();
+    notifyDataSetChanged();
+  }
+
+  /**
+   * Select a view.
+   * @param position Position.
+   * @param value Selection value.
+   */
+  private void selectView(int position, boolean value) {
+    if (value)
+      mSelectedItemsIds.put(position, true);
+    else
+      mSelectedItemsIds.delete(position);
+    notifyDataSetChanged();
+  }
+
+  /**
+   * Returns the selection count.
+   * @return int
+   */
+  int getSelectedCount() {
+    return mSelectedItemsIds.size();
+  }
+
+  /**
+   * Returns the selected ids.
+   * @return SparseBooleanArray
+   */
+  SparseBooleanArray getSelectedIds() {
+    return mSelectedItemsIds;
+  }
+
+  /**
+   * Returns if the position is checked or not.
+   * @param position The item position.
+   * @return boolean
+   */
+  boolean isPositionChecked(int position) {
+    return mSelectedItemsIds.get(position);
   }
 
   /**
@@ -61,8 +118,6 @@ public class FileChooserArrayAdapter extends ArrayAdapter<FileChooserOption> {
   public FileChooserOption getItem(final int i) {
     return mItems.get(i);
   }
-
-
 
   @Override
   public int getPosition(FileChooserOption item) {
@@ -118,6 +173,7 @@ public class FileChooserArrayAdapter extends ArrayAdapter<FileChooserOption> {
         holder.icon.setImageDrawable(o.getIcon());
 
     }
+    v.setBackgroundColor(ContextCompat.getColor(mContext, mSelectedItemsIds.get(position) ? R.color.colorAccent : R.color.windowBackground));
     return v;
   }
 

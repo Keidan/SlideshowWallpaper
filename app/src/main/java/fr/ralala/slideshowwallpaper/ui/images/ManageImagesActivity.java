@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.GridView;
 
 import java.io.File;
+import java.util.StringTokenizer;
 
 import fr.ralala.slideshowwallpaper.R;
 import fr.ralala.slideshowwallpaper.sql.AppDatabase;
@@ -64,6 +65,7 @@ public class ManageImagesActivity extends AppCompatActivity{
     intent.putExtra(FileChooserActivity.FILECHOOSER_SHOW_KEY, "" + FileChooserActivity.FILECHOOSER_SHOW_FILE_AND_DIRECTORY);
     intent.putExtra(FileChooserActivity.FILECHOOSER_FILE_FILTER_KEY, "png,jpeg,jpg,webp");
     intent.putExtra(FileChooserActivity.FILECHOOSER_PREVIEW, FileChooserActivity.FILECHOOSER_PREVIEW_YES);
+    intent.putExtra(FileChooserActivity.FILECHOOSER_MODE, FileChooserActivity.FILECHOOSER_MODE_MULTIPLE);
     startActivityForResult(intent, FileChooserActivity.FILECHOOSER_SELECTION_TYPE_FILE);
   }
 
@@ -78,25 +80,29 @@ public class ManageImagesActivity extends AppCompatActivity{
   protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
     if (requestCode == FileChooserActivity.FILECHOOSER_SELECTION_TYPE_FILE) {
       if (resultCode == RESULT_OK) {
-        final File file = new File(data.getStringExtra(FileChooserActivity.FILECHOOSER_SELECTION_KEY));
-        if(!mGridAdapter.containsName(file.getName())) {
-          Bitmap.CompressFormat format = null;
-          String n = file.getName().toLowerCase();
-          if (n.endsWith(".png"))
-            format = Bitmap.CompressFormat.PNG;
-          if (n.endsWith(".jpg") || n.endsWith(".jpeg"))
-            format = Bitmap.CompressFormat.JPEG;
-          if (n.endsWith(".webp"))
-            format = Bitmap.CompressFormat.WEBP;
-          if (format != null) {
-            Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
-            byte[] array = Image.bitmapToArray(bitmap, format);
-            Image image = new Image(file.getName(), false, array, bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight());
-            AppDatabase.insertImage(mAppDatabase, image);
-            mGridAdapter.add(image);
+        StringTokenizer token = new StringTokenizer(data.getStringExtra(FileChooserActivity.FILECHOOSER_SELECTION_KEY),
+            FileChooserActivity.FILECHOOSER_MULTI_SEPARATOR);
+        while(token.hasMoreTokens()) {
+          final File file = new File(token.nextToken());
+          if (!mGridAdapter.containsName(file.getName())) {
+            Bitmap.CompressFormat format = null;
+            String n = file.getName().toLowerCase();
+            if (n.endsWith(".png"))
+              format = Bitmap.CompressFormat.PNG;
+            if (n.endsWith(".jpg") || n.endsWith(".jpeg"))
+              format = Bitmap.CompressFormat.JPEG;
+            if (n.endsWith(".webp"))
+              format = Bitmap.CompressFormat.WEBP;
+            if (format != null) {
+              Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
+              byte[] array = Image.bitmapToArray(bitmap, format);
+              Image image = new Image(file.getName(), false, array, bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight());
+              AppDatabase.insertImage(mAppDatabase, image);
+              mGridAdapter.add(image);
+            }
+          } else {
+            UIHelper.showAlertDialog(this, R.string.error_title, R.string.error_contains_image);
           }
-        } else {
-          UIHelper.showAlertDialog(this, R.string.error_title, R.string.error_contains_image);
         }
       }
     }

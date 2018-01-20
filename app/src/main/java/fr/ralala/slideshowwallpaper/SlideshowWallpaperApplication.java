@@ -28,7 +28,7 @@ public class SlideshowWallpaperApplication extends Application {
   private static final String KEY_FOLDER = "folder";
   private static final String KEY_CURRENT_FILE = "current";
   private static final String KEY_BROWSE_FROM = "browseFrom";
-  private static final int DEFAULT_FREQUENCY_VAL = 0;
+  private static final int DEFAULT_FREQUENCY_VAL = 30;
   private static final int DEFAULT_FREQUENCY_UNIT = 1;
   private static final boolean DEFAULT_FREQUENCY_SCREEN = true;
   private static final boolean DEFAULT_SCROLLABLE_WALLPAPER_FROM_FOLDER = false;

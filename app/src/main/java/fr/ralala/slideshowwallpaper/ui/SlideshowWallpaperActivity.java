@@ -1,8 +1,6 @@
 package fr.ralala.slideshowwallpaper.ui;
 
 import android.Manifest;
-import android.app.ActivityManager;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
@@ -34,6 +32,7 @@ import fr.ralala.slideshowwallpaper.ui.chooser.FileChooserActivity;
 import fr.ralala.slideshowwallpaper.ui.images.ManageImagesActivity;
 import fr.ralala.slideshowwallpaper.services.utils.ServiceStartupTaskFromUI;
 import fr.ralala.slideshowwallpaper.ui.utils.UIHelper;
+import fr.ralala.slideshowwallpaper.utils.Helper;
 
 /**
  *******************************************************************************
@@ -123,7 +122,7 @@ public class SlideshowWallpaperActivity extends AppCompatActivity implements Ada
     });
 
     mToggleOnOff = findViewById(R.id.toggleOnOff);
-    mToggleOnOff.setChecked(isServiceRunning(SERVICE));
+    mToggleOnOff.setChecked(Helper.isServiceRunning(this, SERVICE));
     mToggleOnOff.setOnClickListener((v) -> {
       if(!mToggleOnOff.isChecked()) {
         ((SlideshowWallpaperApplication)getApplication()).getServiceUtils().setSenpuku(true);
@@ -141,7 +140,7 @@ public class SlideshowWallpaperActivity extends AppCompatActivity implements Ada
                     "[e:" + folder.exists() + ",r:" + folder.canRead() + ",d:" + folder.isDirectory() + "]");
             mToggleOnOff.setChecked(false);
           } else {
-            killServiceIfRunning(SERVICE);
+            Helper.killServiceIfRunning(this, SERVICE);
             mApp.setCurrentFile(SlideshowWallpaperApplication.DEFAULT_CURRENT_FILE);
             ((SlideshowWallpaperApplication) getApplication()).getServiceUtils().setSenpuku(false);
             new ServiceStartupTaskFromUI(this, (start) -> {
@@ -330,7 +329,7 @@ public class SlideshowWallpaperActivity extends AppCompatActivity implements Ada
   @Override
   public void onResume() {
     super.onResume();
-    if(isServiceRunning(SlideshowWallpaperActivity.SERVICE)) {
+    if(Helper.isServiceRunning(this, SlideshowWallpaperActivity.SERVICE)) {
       mToggleOnOff.setChecked(true);
       changeEnabledStateOnServiceStart();
     }
@@ -411,32 +410,6 @@ public class SlideshowWallpaperActivity extends AppCompatActivity implements Ada
   @Override
   public void onNothingSelected(AdapterView<?> adapterView) {
 
-  }
-
-  /**
-   * Test if a specific service is in running state.
-   * @param serviceClass The service class
-   * @return boolean
-   */
-  private boolean isServiceRunning(final Class<?> serviceClass) {
-    final ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-    if(manager != null) {
-      for (final ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-        if (serviceClass.getName().equals(service.service.getClassName())) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  /**
-   * Kill a specific service (if running)
-   * @param serviceClass The service class.
-   */
-  private void killServiceIfRunning(final Class<?> serviceClass) {
-    if(isServiceRunning(serviceClass))
-      stopService(new Intent(this, serviceClass));
   }
 
 }

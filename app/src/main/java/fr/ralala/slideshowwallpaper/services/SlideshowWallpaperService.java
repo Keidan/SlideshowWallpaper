@@ -12,8 +12,6 @@ import android.graphics.Point;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
-import android.view.Display;
-import android.view.WindowManager;
 
 import java.io.File;
 import java.net.URLConnection;
@@ -24,6 +22,7 @@ import fr.ralala.slideshowwallpaper.SlideshowWallpaperApplication;
 import fr.ralala.slideshowwallpaper.sql.AppDatabase;
 import fr.ralala.slideshowwallpaper.sql.Image;
 import fr.ralala.slideshowwallpaper.ui.utils.UIHelper;
+import fr.ralala.slideshowwallpaper.utils.Helper;
 
 /**
  *******************************************************************************
@@ -158,42 +157,8 @@ public class SlideshowWallpaperService extends Service implements Runnable {
    * @throws Exception If an error has occurred.
    */
   private void changeWallpaper(Bitmap bm, boolean scrollable, int idx) throws Exception {
-    Log.i(getClass().getSimpleName(), "MainScreen -> idx:"+idx+", current:"+mApp.getCurrentFile() + ", bm:"+bm + ", scrollable:"+scrollable);
-    if(!scrollable)
-      mWallpaperManager.setBitmap(bm);
-    else {
-      //get screen height
-      boolean error = false;
-      WindowManager window = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
-      if(window != null) {
-        try {
-          Display display = window.getDefaultDisplay();
-          Point size = new Point();
-          display.getSize(size);
-          int screenHeight = size.y;
-          int screenWidth = size.x;
-          //adjust the aspect ratio of the Image
-          //this is the main part
-          int width = bm.getWidth();
-          int height = bm.getHeight();
-          height = (height * screenWidth / bm.getWidth());
-          width = (width * screenHeight) / bm.getHeight();
-          Log.i(getClass().getSimpleName(), "MainScreen -> Src [w:" + bm.getWidth() + ", h:" +
-              bm.getHeight() + "], Screen [w:" + size.x + ", h:" + size.y + "], Dst [w:" + width + ", h:" + height + "]");
-          //set the wallpaper
-          //this may not be the most efficient way but it worked for me
-          mWallpaperManager.setBitmap(Bitmap.createScaledBitmap(bm, width, height, true));
-        } catch (Exception e) {
-          Log.e(getClass().getSimpleName(), "Exception: " + e.getMessage(), e);
-          error = true;
-        }
-      } else
-        error = true;
-      if(error) {
-        Log.e(getClass().getSimpleName(), "MainScreen -> An error occurred with the scrollable wallpaper. Using static wallpaper instead.");
-        mWallpaperManager.setBitmap(bm);
-      }
-    }
+    Log.i(getClass().getSimpleName(), "MainScreen -> idx:"+idx+", current:"+mApp.getCurrentFile() + ", bm:[w="+bm.getWidth()+",h=" + bm.getHeight()+"]" + ", scrollable:"+scrollable);
+    mWallpaperManager.setBitmap(bm);
     if(mApp.isLockScreenWallpaper()) {
       Log.i(getClass().getSimpleName(), "LockScreen -> idx:"+idx+", current:"+mApp.getCurrentFile() + ", bm:"+bm);
       mWallpaperManager.setBitmap(bm, null, true, WallpaperManager.FLAG_LOCK);
@@ -204,6 +169,8 @@ public class SlideshowWallpaperService extends Service implements Runnable {
    * Apply the change.
    */
   private void performChange() {
+    Point screenSize = Helper.getRealScreenDimension(this);
+    Log.i(getClass().getSimpleName(), "MainScreen -> Screen [width:" + screenSize.x + ", height:" + screenSize.y + "]");
     if(mApp.getBrowseFrom() == SlideshowWallpaperApplication.BROWSE_FROM_FOLDER) {
       Log.d(getClass().getSimpleName(), "performChange from folder");
       int idx = 0;
@@ -223,12 +190,19 @@ public class SlideshowWallpaperService extends Service implements Runnable {
           if (i == mApp.getCurrentFile()) {
             try {
               Bitmap bm = BitmapFactory.decodeFile(path);
+              if(scrollable) {
+                Point p = Helper.getScrolledDimension(this, bm, false);
+                bm = Bitmap.createScaledBitmap(bm, p.x, p.y, true);
+              }
               changeWallpaper(bm, scrollable, idx);
               break;
             } catch (Exception e) {
               String err = getString(R.string.error_unable_to_read_file) + " '" + file.getName() + "'";
               UIHelper.toast(this, err);
               Log.e(getClass().getSimpleName(), err, e);
+              mApp.getServiceUtils().setStarted(false);
+              stopSelf();
+              return;
             }
           }
         }
@@ -250,8 +224,11 @@ public class SlideshowWallpaperService extends Service implements Runnable {
               if(image.isScrollable()) {
                 Bitmap temp = image.getBitmap();
                 Log.i(getClass().getSimpleName(), "MainScreen -> Original [x:" + image.getX() + ", y:" +
-                    image.getY() + ", w:" + temp.getWidth() + ", h:" + temp.getHeight() + "]");
-                Bitmap part = Bitmap.createBitmap(temp, image.getX(), image.getY(), image.getWidth(), image.getHeight(), null, true);
+                    image.getY() + ", w:" + temp.getWidth() + ", h:" + temp.getHeight() + "], Db [w:" + image.getWidth() + ", h:" + image.getHeight() + "]");
+                //Bitmap part = Bitmap.createBitmap(temp, image.getX(), image.getY(), image.getWidth() - image.getX(), image.getHeight() - image.getY(), null, true);
+                Bitmap part = Bitmap.createBitmap(temp, image.getX(), image.getY(), image.getWidth() - image.getX(), image.getHeight() - image.getY(), null, true);
+
+                Log.i(getClass().getSimpleName(), "MainScreen -> Scrolled [x:0, y:0, w:" + part.getWidth() + ", h:" + part.getHeight() + "]");
                 changeWallpaper(part, true, idx);
               } else
                 changeWallpaper(image.getBitmap(), false, idx);
@@ -260,6 +237,15 @@ public class SlideshowWallpaperService extends Service implements Runnable {
               String err = getString(R.string.error_unable_to_read_file) + " '" + image.getName() + "'";
               UIHelper.toast(this, err);
               Log.e(getClass().getSimpleName(), err, e);
+              try {
+                changeWallpaper(image.getBitmap(), false, idx);
+              }  catch (Exception ee) {
+                Log.e(getClass().getSimpleName(), "Exception: " + ee.getMessage(), ee);
+                mApp.getServiceUtils().setStarted(false);
+                stopSelf();
+                return;
+              }
+              break;
             }
           }
         }
@@ -328,4 +314,6 @@ public class SlideshowWallpaperService extends Service implements Runnable {
     }
     return delay;
   }
+
+
 }

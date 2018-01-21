@@ -156,4 +156,19 @@ public class Image {
   public int getHeight() {
     return mHeight;
   }
+
+
+  /**
+   * Returns the image bounds.
+   * @param x The new value.
+   * @param y The new value.
+   * @param width The new value.
+   * @param height The new value.
+   */
+  public void setBounds(int x, int y, int width, int height) {
+    mX = x;
+    mY = y;
+    mWidth = width;
+    mHeight = height;
+  }
 }

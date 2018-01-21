@@ -1,7 +1,6 @@
 package fr.ralala.slideshowwallpaper.ui.images;
 
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.ColorDrawable;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.ActionBar;
@@ -11,11 +10,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.ImageView;
 
 import fr.ralala.slideshowwallpaper.R;
 import fr.ralala.slideshowwallpaper.sql.AppDatabase;
 import fr.ralala.slideshowwallpaper.sql.Image;
+import fr.ralala.slideshowwallpaper.ui.images.views.ImageView;
+import fr.ralala.slideshowwallpaper.ui.images.views.Rectangle;
 import fr.ralala.slideshowwallpaper.ui.utils.UIHelper;
 
 /**
@@ -32,6 +32,7 @@ public class ImageActivity  extends AppCompatActivity {
   protected static final String KEY_NAME = "ImageActivity.KEY_NAME";
   private Image mImage;
   private AppDatabase mAppDatabase;
+  private ImageView mImageView;
 
   /**
    * Called when the activity is created.
@@ -65,11 +66,14 @@ public class ImageActivity  extends AppCompatActivity {
         actionbar.setDisplayShowHomeEnabled(true);
       }
     }
-    ImageView iv = findViewById(R.id.image);
-    iv.postDelayed(() -> {
+    mImageView = findViewById(R.id.image);
+    mImageView.setCornerColor(Color.parseColor("#FFFFFFFF"));
+    mImageView.setRectangleColor(Color.parseColor("#FFFFFFFF"));
+
+    mImageView.postDelayed(() -> {
       if(toolbar != null)
         toolbar.setTitle(mImage.getName());
-      iv.setImageDrawable(new BitmapDrawable(getResources(), mImage.getBitmap()));
+      mImageView.setImage(mImage);
     }, DELAY_MS);
   }
 
@@ -91,6 +95,9 @@ public class ImageActivity  extends AppCompatActivity {
   @Override
   public void onBackPressed() {
     UIHelper.closeTransition(this);
+    Rectangle rect = mImageView.getRealRectangle();
+    mImage.setBounds(rect.x, rect.y, rect.w, rect.h);
+    AppDatabase.updateImage(mAppDatabase, mImage);
     super.onBackPressed();
   }
 
@@ -108,6 +115,7 @@ public class ImageActivity  extends AppCompatActivity {
       case R.id.action_scrollable:
         item.setChecked(!item.isChecked());
         mImage.setScrollable(item.isChecked());
+        mImageView.setImage(mImage);
         AppDatabase.updateImage(mAppDatabase, mImage);
         return true;
     }

@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.GridView;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.StringTokenizer;
 
 import fr.ralala.slideshowwallpaper.R;
@@ -82,6 +83,10 @@ public class ManageImagesActivity extends AppCompatActivity{
       if (resultCode == RESULT_OK) {
         StringTokenizer token = new StringTokenizer(data.getStringExtra(FileChooserActivity.FILECHOOSER_SELECTION_KEY),
             FileChooserActivity.FILECHOOSER_MULTI_SEPARATOR);
+        if(mGridAdapter == null) {
+          mGridAdapter = new GridViewAdapter(this, R.layout.grid_item_layout, Collections.emptyList());
+          mGridView.setAdapter(mGridAdapter);
+        }
         while(token.hasMoreTokens()) {
           final File file = new File(token.nextToken());
           if (!mGridAdapter.containsName(file.getName())) {
@@ -96,7 +101,7 @@ public class ManageImagesActivity extends AppCompatActivity{
             if (format != null) {
               Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
               byte[] array = Image.bitmapToArray(bitmap, format);
-              Image image = new Image(file.getName(), false, array, bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight());
+              Image image = new Image(file.getName(), false, array, bitmap, 0, 0, 0, 0);
               AppDatabase.insertImage(mAppDatabase, image);
               mGridAdapter.add(image);
             }

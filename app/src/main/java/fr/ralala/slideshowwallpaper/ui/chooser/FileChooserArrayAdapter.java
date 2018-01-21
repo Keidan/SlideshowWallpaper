@@ -1,6 +1,7 @@
 package fr.ralala.slideshowwallpaper.ui.chooser;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -8,6 +9,7 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.util.SparseBooleanArray;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -166,8 +168,11 @@ public class FileChooserArrayAdapter extends ArrayAdapter<FileChooserOption> {
       if(o.isPreview()) {
         holder.icon.post(() -> {
           Bitmap bitmap = BitmapFactory.decodeFile(o.getPath());
-          Drawable drawable = new BitmapDrawable(mContext.getResources(), Bitmap.createScaledBitmap(bitmap, 72, 72, true));
+          Resources r = mContext.getResources();
+          int px = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 48, r.getDisplayMetrics());
+          Drawable drawable = new BitmapDrawable(mContext.getResources(), Bitmap.createScaledBitmap(bitmap, px, px, true));
           holder.icon.setImageDrawable(drawable);
+          holder.icon.setAdjustViewBounds(true);
         });
       } else
         holder.icon.setImageDrawable(o.getIcon());

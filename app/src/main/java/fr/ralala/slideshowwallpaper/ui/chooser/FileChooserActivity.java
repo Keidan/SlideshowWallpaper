@@ -419,7 +419,7 @@ public class FileChooserActivity extends AppCompatActivity implements AdapterVie
         || o.getData().equalsIgnoreCase(getString(R.string.chooser_parent_directory))) {
       mCurrentDir = new File(o.getPath());
       fill(mCurrentDir);
-    } else if (mType == FILECHOOSER_TYPE_FILE_ONLY && mMode == FILECHOOSER_MODE_SINGLE) {
+    } else if (mType == FILECHOOSER_TYPE_FILE_ONLY /*&& mMode == FILECHOOSER_MODE_SINGLE*/) {
       confirm(Collections.singletonList(o));
     }
   }

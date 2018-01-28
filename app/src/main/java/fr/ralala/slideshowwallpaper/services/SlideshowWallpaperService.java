@@ -227,7 +227,13 @@ public class SlideshowWallpaperService extends Service implements Runnable {
                 Log.i(getClass().getSimpleName(), "MainScreen -> Original [x:" + image.getX() + ", y:" +
                     image.getY() + ", w:" + temp.getWidth() + ", h:" + temp.getHeight() + "], Db [w:" + image.getWidth() + ", h:" + image.getHeight() + "]");
                 //Bitmap part = Bitmap.createBitmap(temp, image.getX(), image.getY(), image.getWidth() - image.getX(), image.getHeight() - image.getY(), null, true);
-                Bitmap part = Bitmap.createBitmap(temp, image.getX(), image.getY(), image.getWidth() - image.getX(), image.getHeight() - image.getY(), null, true);
+                Bitmap part;
+                if(image.getWidth() == 0 || image.getHeight() == 0) {
+                  Bitmap bm = image.getBitmap();
+                  Point p = Helper.getScrolledDimension(this, bm, false);
+                  part = Bitmap.createScaledBitmap(bm, p.x, p.y, true);
+                } else
+                  part = Bitmap.createBitmap(temp, image.getX(), image.getY(), image.getWidth() - image.getX(), image.getHeight() - image.getY(), null, true);
 
                 Log.i(getClass().getSimpleName(), "MainScreen -> Scrolled [x:0, y:0, w:" + part.getWidth() + ", h:" + part.getHeight() + "]");
                 changeWallpaper(part, true, idx);

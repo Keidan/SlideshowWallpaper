@@ -24,6 +24,7 @@ import fr.ralala.slideshowwallpaper.utils.Helper;
  *******************************************************************************
  */
 public class ImageView extends View {
+  private boolean USE_CORNERS_NO = false;
   private static final int STROKE_WIDTH = 5;
   private Paint mPaintRectangle = new Paint();
   private Paint mPaintCorner = new Paint();
@@ -40,6 +41,7 @@ public class ImageView extends View {
   private Bitmap mScaled;
   private double diffWidth;
   private double diffHeight;
+  private boolean mUseCorners = USE_CORNERS_NO;
 
   public ImageView(Context context) {
     super(context);
@@ -106,7 +108,7 @@ public class ImageView extends View {
 
   @Override
   public boolean onTouchEvent(MotionEvent event) {
-    if(!mImage.isScrollable()) {
+    if(!mImage.isScrollable() || mUseCorners == USE_CORNERS_NO) {
       return super.onTouchEvent(event);
     }
     final int x = (int) event.getRawX();
@@ -139,7 +141,7 @@ public class ImageView extends View {
   public void setImage(Image image) {
     Bitmap bm = image.getBitmap();
     mImage = image;
-    if(image.isScrollable()) {
+    if(image.isScrollable() && mUseCorners != USE_CORNERS_NO) {
       Point scrolled = Helper.getScrolledDimension(getContext(), bm, false);
       Log.e("TAG", "Screen: " + mScreen);
       Log.e("TAG", "scrolled: " + scrolled);
@@ -221,10 +223,14 @@ public class ImageView extends View {
   public Rectangle getRealRectangle() {
     Log.e("TAG", "Before Rectangle: " + mRectangle);
     if(mImage.isScrollable()) {
-      /* rescale XY */
-      mRectangle.x = (int) ((double) mRectangle.x + (((double) mRectangle.x * diffWidth) / (double) 100));
-      mRectangle.y = (int) ((double) mRectangle.y + (((double) mRectangle.y * diffHeight) / (double) 100));
-      mRealRectangle.setXY(mRectangle.x, mRectangle.y);
+      if(mUseCorners == USE_CORNERS_NO) {
+        mRectangle.w = mRectangle.h = 0;
+      } else {
+        /* rescale XY */
+        mRectangle.x = (int) ((double) mRectangle.x + (((double) mRectangle.x * diffWidth) / (double) 100));
+        mRectangle.y = (int) ((double) mRectangle.y + (((double) mRectangle.y * diffHeight) / (double) 100));
+        mRealRectangle.setXY(mRectangle.x, mRectangle.y);
+      }
     } else {
       mRectangle.x = mRectangle.y = 0;
       mRectangle.w = mScreen.x;
@@ -240,7 +246,7 @@ public class ImageView extends View {
       return;
     /* Draw the background image */
     canvas.drawBitmap(mScaled, 0, 0, mPaintRectangle);
-    if(!mImage.isScrollable()) return;
+    if(!mImage.isScrollable() || mUseCorners == USE_CORNERS_NO) return;
     /* Display of the selection rectangle for the view to be displayed in scroll mode */
     updateBounds();
     /* Draw selection view */

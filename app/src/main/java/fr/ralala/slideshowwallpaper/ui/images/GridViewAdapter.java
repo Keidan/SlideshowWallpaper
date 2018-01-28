@@ -69,12 +69,12 @@ public class GridViewAdapter extends ArrayAdapter<Image> {
 
   /**
    * Tests if the image is already present.
-   * @param imageName The image name.
+   * @param imagePath The image path.
    * @return boolean
    */
-  boolean containsName(String imageName) {
+  boolean containsPath(String imagePath) {
     for(int i = 0; i < mData.size(); i++)
-      if(mData.get(i).getName().equals(imageName))
+      if(mData.get(i).getPath().equals(imagePath))
         return true;
     return false;
   }

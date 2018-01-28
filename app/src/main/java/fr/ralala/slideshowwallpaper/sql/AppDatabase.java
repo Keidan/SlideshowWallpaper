@@ -127,6 +127,13 @@ public abstract class AppDatabase extends RoomDatabase {
       database.mExecutor.execute(() -> database.runInTransaction(() -> {
         List<Image> images = new ArrayList<>();
         images.addAll(database.imageDao().list());
+        for(int i = 0; i < images.size(); i++) {
+          Image img = images.get(i);
+          if (!img.getFile().exists()) {
+            deleteImage(database, img);
+            images.remove(i);
+          }
+        }
         if(activity == null)
           listener.listImages(images);
         else
@@ -145,13 +152,13 @@ public abstract class AppDatabase extends RoomDatabase {
    * Finds an image.
    * @param database The database reference.
    * @param activity The activity (if non null the listener is called in the UI thread).
-   * @param name The image name.
+   * @param path The image path.
    * @param listener The find listener.
    */
-  public static void findImage(final AppDatabase database, final AppCompatActivity activity, final String name, final FindListener listener) {
+  public static void findImage(final AppDatabase database, final AppCompatActivity activity, final String path, final FindListener listener) {
     synchronized (database) {
       database.mExecutor.execute(() -> database.runInTransaction(() -> {
-        final Image img = database.imageDao().findByName(name);
+        final Image img = database.imageDao().findByPath(path);
         if(activity == null)
           listener.findImage(img);
         else

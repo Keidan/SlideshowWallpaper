@@ -8,7 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.annotation.NonNull;
 
-import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.util.UUID;
 
 /**
@@ -26,14 +26,11 @@ public class Image {
   @ColumnInfo(name = "id")
   private @NonNull String mId;
 
-  @ColumnInfo(name = "name")
-  private String mName;
+  @ColumnInfo(name = "path")
+  private String mPath;
 
   @ColumnInfo(name = "scrollable")
   private boolean mScrollable;
-
-  @ColumnInfo(name = "data")
-  private byte[] mData;
 
   @ColumnInfo(name = "x")
   private int mX;
@@ -51,34 +48,29 @@ public class Image {
   private Bitmap mBitmap;
 
   @Ignore
-  public Image(String name, boolean scrollable, byte[] data, Bitmap bm, int x, int y, int width, int height) {
+  private File mPathFile;
+
+  @Ignore
+  public Image(String path, boolean scrollable, Bitmap bm, int x, int y, int width, int height) {
     mId = UUID.randomUUID().toString();
-    initialize(name, scrollable, null, x, y, width, height);
-    mData = data;
+    initialize(path, scrollable, x, y, width, height);
     mBitmap = bm;
   }
 
-  public Image(@NonNull String id, String name, boolean scrollable, byte[] data, int x, int y, int width, int height) {
+  public Image(@NonNull String id, String path, boolean scrollable, int x, int y, int width, int height) {
     mId = id;
-    initialize(name, scrollable, data, x, y, width, height);
+    initialize(path, scrollable, x, y, width, height);
+    mBitmap = BitmapFactory.decodeFile(path);
   }
 
-  public static byte[] bitmapToArray(Bitmap bitmap, Bitmap.CompressFormat format) {
-    ByteArrayOutputStream blob = new ByteArrayOutputStream();
-    bitmap.compress(format, 100 /* Ignored for PNGs */, blob);
-    return blob.toByteArray();
-  }
-
-  private void initialize(String name, boolean scrollable, byte[] data, int x, int y, int width, int height) {
-    mName = name;
+  private void initialize(String path, boolean scrollable, int x, int y, int width, int height) {
+    mPath = path;
     mScrollable = scrollable;
-    mData = data;
     mX = x;
     mY = y;
     mWidth = width;
     mHeight = height;
-    if(data != null)
-      mBitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+    mPathFile = new File(mPath);
   }
 
   public Bitmap getBitmap() {
@@ -94,11 +86,19 @@ public class Image {
   }
 
   /**
-   * Returns the image name.
+   * Returns the image path file.
+   * @return File
+   */
+  public File getFile() {
+    return mPathFile;
+  }
+
+  /**
+   * Returns the image path.
    * @return String
    */
-  public String getName() {
-    return mName;
+  public String getPath() {
+    return mPath;
   }
 
   /**
@@ -115,14 +115,6 @@ public class Image {
    */
   public void setScrollable(boolean scrollable) {
     mScrollable = scrollable;
-  }
-
-  /**
-   * Returns the image data.
-   * @return byte[]
-   */
-  public byte[] getData() {
-    return mData;
   }
 
   /**

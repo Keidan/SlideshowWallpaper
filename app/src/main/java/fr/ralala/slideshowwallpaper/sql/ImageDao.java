@@ -27,12 +27,12 @@ public interface ImageDao {
   List<Image> list();
 
   /**
-   * Finds an image by name.
-   * @param name The image name.
+   * Finds an image by path.
+   * @param path The image path.
    * @return Image
    */
-  @Query("SELECT * FROM images where name LIKE  :name")
-  Image findByName(String name);
+  @Query("SELECT * FROM images where path LIKE  :path")
+  Image findByPath(String path);
 
   /**
    * Inserts an image.

@@ -72,7 +72,7 @@ public class ImageActivity  extends AppCompatActivity {
 
     mImageView.postDelayed(() -> {
       if(toolbar != null)
-        toolbar.setTitle(mImage.getName());
+        toolbar.setTitle(mImage.getFile().getName());
       mImageView.setImage(mImage);
     }, DELAY_MS);
   }

@@ -89,7 +89,7 @@ public class ManageImagesActivity extends AppCompatActivity{
         }
         while(token.hasMoreTokens()) {
           final File file = new File(token.nextToken());
-          if (!mGridAdapter.containsName(file.getName())) {
+          if (!mGridAdapter.containsPath(file.getName())) {
             Bitmap.CompressFormat format = null;
             String n = file.getName().toLowerCase();
             if (n.endsWith(".png"))
@@ -99,9 +99,9 @@ public class ManageImagesActivity extends AppCompatActivity{
             if (n.endsWith(".webp"))
               format = Bitmap.CompressFormat.WEBP;
             if (format != null) {
-              Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
-              byte[] array = Image.bitmapToArray(bitmap, format);
-              Image image = new Image(file.getName(), false, array, bitmap, 0, 0, 0, 0);
+              String path = file.getAbsolutePath();
+              Bitmap bitmap = BitmapFactory.decodeFile(path);
+              Image image = new Image(path, false, bitmap, 0, 0, 0, 0);
               AppDatabase.insertImage(mAppDatabase, image);
               mGridAdapter.add(image);
             }
@@ -125,7 +125,7 @@ public class ManageImagesActivity extends AppCompatActivity{
         Image image = mGridAdapter.getItem(position);
         if(image != null) {
           final Intent intent = new Intent(this, ImageActivity.class);
-          intent.putExtra(ImageActivity.KEY_NAME, image.getName());
+          intent.putExtra(ImageActivity.KEY_NAME, image.getPath());
           startActivity(intent);
         }
       });

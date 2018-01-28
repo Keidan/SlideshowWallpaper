@@ -235,7 +235,7 @@ public class SlideshowWallpaperService extends Service implements Runnable {
                 changeWallpaper(image.getBitmap(), false, idx);
               break;
             } catch (Exception e) {
-              String err = getString(R.string.error_unable_to_read_file) + " '" + image.getName() + "'";
+              String err = getString(R.string.error_unable_to_read_file) + " '" + image.getFile().getName() + "'";
               UIHelper.toast(this, err);
               Log.e(getClass().getSimpleName(), err, e);
               try {

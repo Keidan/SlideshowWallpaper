@@ -34,6 +34,7 @@ import fr.ralala.slideshowwallpaper.utils.Helper;
  *******************************************************************************
  */
 public class SlideshowWallpaperService extends Service implements Runnable {
+  private static final long RESTART_TIME_LIMIT = 30000;
   private static final String RESTART_ACTION = "fr.ralala.slideshowwallpaper.RESTART";
   private SlideshowWallpaperApplication mApp = null;
   private Handler mHandler;
@@ -169,6 +170,12 @@ public class SlideshowWallpaperService extends Service implements Runnable {
    * Apply the change.
    */
   private void performChange() {
+    long current = System.currentTimeMillis();
+    if(mApp.getLastUpdateTime() != SlideshowWallpaperApplication.DEFAULT_LAST_UPDATE_TIME && (current - mApp.getLastUpdateTime() < RESTART_TIME_LIMIT)) {
+      Log.w(getClass().getSimpleName(), "The service has been restarted by the system!");
+      return;
+    }
+    mApp.setLastUpdateTime(current);
     Point screenSize = Helper.getRealScreenDimension(this);
     Log.i(getClass().getSimpleName(), "MainScreen -> Screen [width:" + screenSize.x + ", height:" + screenSize.y + "]");
     if(mApp.getBrowseFrom() == SlideshowWallpaperApplication.BROWSE_FROM_FOLDER) {

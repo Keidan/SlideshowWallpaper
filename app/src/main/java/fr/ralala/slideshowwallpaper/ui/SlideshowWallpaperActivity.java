@@ -127,7 +127,7 @@ public class SlideshowWallpaperActivity extends AppCompatActivity implements Ada
       if(!mToggleOnOff.isChecked()) {
         ((SlideshowWallpaperApplication)getApplication()).getServiceUtils().setSenpuku(true);
         stopService(new Intent(this, SERVICE));
-        mApp.setCurrentFile(0);
+        mApp.resetRequiredConfig();
       } else {
         if(mApp.getFolder().isEmpty()) {
           UIHelper.showAlertDialog(this, R.string.error_title, R.string.error_invalid_folder_empty);
@@ -141,7 +141,7 @@ public class SlideshowWallpaperActivity extends AppCompatActivity implements Ada
             mToggleOnOff.setChecked(false);
           } else {
             Helper.killServiceIfRunning(this, SERVICE);
-            mApp.setCurrentFile(SlideshowWallpaperApplication.DEFAULT_CURRENT_FILE);
+            mApp.resetRequiredConfig();
             ((SlideshowWallpaperApplication) getApplication()).getServiceUtils().setSenpuku(false);
             new ServiceStartupTaskFromUI(this, (start) -> {
               if(!start) {

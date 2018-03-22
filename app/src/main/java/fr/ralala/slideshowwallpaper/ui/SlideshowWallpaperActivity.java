@@ -125,7 +125,7 @@ public class SlideshowWallpaperActivity extends AppCompatActivity implements Ada
     mToggleOnOff.setChecked(Helper.isServiceRunning(this, SERVICE));
     mToggleOnOff.setOnClickListener((v) -> {
       if(!mToggleOnOff.isChecked()) {
-        ((SlideshowWallpaperApplication)getApplication()).getServiceUtils().setSenpuku(true);
+        mApp.getServiceUtils().setSenpuku(true);
         stopService(new Intent(this, SERVICE));
         mApp.resetRequiredConfig();
       } else {

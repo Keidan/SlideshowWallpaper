@@ -25,7 +25,6 @@ public class SlideshowWallpaperApplication extends Application {
   private static final String KEY_LOCK_SCREEN_WALLPAPER = "lockScreenWallpaper";
   private static final String KEY_FREQUENCY_VAL = "frequencyValue";
   private static final String KEY_FREQUENCY_UNIT = "frequencyUnit";
-  private static final String KEY_LAST_UPDATE_TIME = "lastUpdateTime";
   private static final String KEY_FOLDER = "folder";
   private static final String KEY_CURRENT_FILE = "current";
   private static final String KEY_BROWSE_FROM = "browseFrom";
@@ -35,7 +34,6 @@ public class SlideshowWallpaperApplication extends Application {
   private static final boolean DEFAULT_SCROLLABLE_WALLPAPER_FROM_FOLDER = false;
   private static final boolean DEFAULT_LOCK_SCREEN_WALLPAPER = false;
   private static final String DEFAULT_FOLDER = "";
-  public static final int DEFAULT_LAST_UPDATE_TIME = 0;
   public static final int DEFAULT_CURRENT_FILE = 0;
   public static final int BROWSE_FROM_FOLDER = 0;
   public static final int BROWSE_FROM_DATABASE = 1;
@@ -53,7 +51,6 @@ public class SlideshowWallpaperApplication extends Application {
    * Reset required config.
    */
   public void resetRequiredConfig() {
-    setLastUpdateTime(SlideshowWallpaperApplication.DEFAULT_LAST_UPDATE_TIME);
     setCurrentFile(SlideshowWallpaperApplication.DEFAULT_CURRENT_FILE);
   }
 
@@ -76,24 +73,6 @@ public class SlideshowWallpaperApplication extends Application {
     if(mServiceUtils == null)
       mServiceUtils = new ServiceUtils();
     return mServiceUtils;
-  }
-
-  /**
-   * Sets the last update time.
-   * @param lastUpdateTime The new value.
-   */
-  public void setLastUpdateTime(long lastUpdateTime) {
-    SharedPreferences.Editor e = mPrefs.edit();
-    e.putLong(KEY_LAST_UPDATE_TIME, lastUpdateTime);
-    e.apply();
-  }
-
-  /**
-   * Returns the last update time.
-   * @return long
-   */
-  public long getLastUpdateTime() {
-    return mPrefs.getLong(KEY_LAST_UPDATE_TIME, DEFAULT_LAST_UPDATE_TIME);
   }
 
   /**
@@ -239,5 +218,6 @@ public class SlideshowWallpaperApplication extends Application {
   public String getFolder() {
     return mPrefs.getString(KEY_FOLDER, DEFAULT_FOLDER);
   }
+
 
 }

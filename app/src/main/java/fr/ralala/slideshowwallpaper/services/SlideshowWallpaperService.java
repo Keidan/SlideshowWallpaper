@@ -34,12 +34,12 @@ import fr.ralala.slideshowwallpaper.utils.Helper;
  *******************************************************************************
  */
 public class SlideshowWallpaperService extends Service implements Runnable {
-  private static final long RESTART_TIME_LIMIT = 30000;
   private static final String RESTART_ACTION = "fr.ralala.slideshowwallpaper.RESTART";
   private SlideshowWallpaperApplication mApp = null;
   private Handler mHandler;
   private WallpaperManager mWallpaperManager;
   private ScreenReceiver mScreenReceiver = null;
+  static SlideshowWallpaperService instance;
 
   private class ScreenReceiver extends BroadcastReceiver {
     /**
@@ -52,8 +52,10 @@ public class SlideshowWallpaperService extends Service implements Runnable {
       final String action = intent.getAction();
       if(action == null)
         return;
-      if(action.equals(Intent.ACTION_SCREEN_OFF))
+      if(action.equals(Intent.ACTION_SCREEN_OFF)) {
+        Log.i(getClass().getSimpleName(), "OFF screen action received");
         performChange();
+      }
     }
   }
 
@@ -63,6 +65,11 @@ public class SlideshowWallpaperService extends Service implements Runnable {
   @Override
   public void onCreate() {
     super.onCreate();
+    instance = this;
+
+    if (startService(new Intent(this, SlideshowWallpaperFakeService.class)) == null)
+      throw new RuntimeException("Couldn't find " + SlideshowWallpaperFakeService.class.getSimpleName());
+
     boolean kill = false;
     mApp = ((SlideshowWallpaperApplication) getApplication());
     mApp.getServiceUtils().setCreated(true);
@@ -87,12 +94,13 @@ public class SlideshowWallpaperService extends Service implements Runnable {
       }
       if(!kill) {
         mWallpaperManager = WallpaperManager.getInstance(getApplicationContext());
-        if(!mApp.isFrequencyScreen())
+        if(!mApp.isFrequencyScreen()) {
+          Log.i(getClass().getSimpleName(), "Starts the service with frequency management.");
           mHandler = new Handler();
-        else {
+        } else {
+          Log.i(getClass().getSimpleName(), "Starts the service with notifications when the screen is on/ off.");
           // register receiver that handles screen on and screen off logic
-          final IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
-          filter.addAction(Intent.ACTION_SCREEN_OFF);
+          final IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
           mScreenReceiver = new ScreenReceiver();
           registerReceiver(mScreenReceiver, filter);
         }
@@ -125,6 +133,7 @@ public class SlideshowWallpaperService extends Service implements Runnable {
       sendBroadcast(intent);
     } else
       Log.i(getClass().getSimpleName(), "Destroy service.");
+    instance = null;
     super.onDestroy();
   }
 
@@ -139,7 +148,10 @@ public class SlideshowWallpaperService extends Service implements Runnable {
   public int onStartCommand(final Intent intent, final int flags,
                             final int startId) {
     new Thread(() -> {
-      performChange();
+      if(intent != null)
+        performChange();
+      else
+        Log.w(getClass().getSimpleName(), "The service has been restarted by the system, so change is not necessary!");
       if(!mApp.isFrequencyScreen()) {
         long delay = getDelay();
         Log.i(getClass().getSimpleName(), "Service delay " + delay);
@@ -170,12 +182,6 @@ public class SlideshowWallpaperService extends Service implements Runnable {
    * Apply the change.
    */
   private void performChange() {
-    long current = System.currentTimeMillis();
-    if(mApp.getLastUpdateTime() != SlideshowWallpaperApplication.DEFAULT_LAST_UPDATE_TIME && (current - mApp.getLastUpdateTime() < RESTART_TIME_LIMIT)) {
-      Log.w(getClass().getSimpleName(), "The service has been restarted by the system!");
-      return;
-    }
-    mApp.setLastUpdateTime(current);
     Point screenSize = Helper.getRealScreenDimension(this);
     Log.i(getClass().getSimpleName(), "MainScreen -> Screen [width:" + screenSize.x + ", height:" + screenSize.y + "]");
     if(mApp.getBrowseFrom() == SlideshowWallpaperApplication.BROWSE_FROM_FOLDER) {
@@ -328,6 +334,5 @@ public class SlideshowWallpaperService extends Service implements Runnable {
     }
     return delay;
   }
-
 
 }

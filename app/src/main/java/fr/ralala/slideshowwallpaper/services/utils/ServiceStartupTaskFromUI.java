@@ -52,6 +52,7 @@ public class ServiceStartupTaskFromUI extends AsyncTask<Void, Void, Boolean>{
     SlideshowWallpaperApplication app = (SlideshowWallpaperApplication)a.getApplication();
     if(!app.getServiceUtils().isStarted()) {
       a.startService(new Intent(a, SlideshowWallpaperActivity.SERVICE));
+
       int sec = 0;
       while(!app.getServiceUtils().isSenpuku() && !app.getServiceUtils().isStarted()) {
         try {

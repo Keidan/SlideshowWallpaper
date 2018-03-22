@@ -52,8 +52,10 @@ public class SlideshowWallpaperService extends Service implements Runnable {
       final String action = intent.getAction();
       if(action == null)
         return;
-      if(action.equals(Intent.ACTION_SCREEN_OFF))
+      if(action.equals(Intent.ACTION_SCREEN_OFF)) {
+        Log.i(getClass().getSimpleName(), "OFF screen action received");
         performChange();
+      }
     }
   }
 
@@ -87,9 +89,11 @@ public class SlideshowWallpaperService extends Service implements Runnable {
       }
       if(!kill) {
         mWallpaperManager = WallpaperManager.getInstance(getApplicationContext());
-        if(!mApp.isFrequencyScreen())
+        if(!mApp.isFrequencyScreen()) {
+          Log.i(getClass().getSimpleName(), "Starts the service with frequency management.");
           mHandler = new Handler();
-        else {
+        } else {
+          Log.i(getClass().getSimpleName(), "Starts the service with notifications when the screen is on/ off.");
           // register receiver that handles screen on and screen off logic
           final IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
           filter.addAction(Intent.ACTION_SCREEN_OFF);

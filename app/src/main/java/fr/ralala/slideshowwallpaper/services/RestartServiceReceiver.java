@@ -26,8 +26,9 @@ public class RestartServiceReceiver extends BroadcastReceiver {
    */
   @Override
   public void onReceive(final Context context, final Intent intent) {
+    Log.i(getClass().getSimpleName(), "New restart notification received.");
     if(intent.getAction() == null) {
-      Log.w(getClass().getSimpleName(), "System fully started with null action");
+      Log.w(getClass().getSimpleName(), "System fully started with null action.");
     }
     ((SlideshowWallpaperApplication)context.getApplicationContext()).setLastUpdateTime(SlideshowWallpaperApplication.DEFAULT_LAST_UPDATE_TIME);
     final Intent service = new Intent(context, SlideshowWallpaperActivity.SERVICE);
